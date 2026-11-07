@@ -1,5 +1,7 @@
 package my.teduh.claims.claims;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,5 +16,14 @@ interface ClaimRepository extends JpaRepository<Claim, UUID> {
 	/** The next number for a claim reference. Each call returns a new number, even across transactions. */
 	@Query(value = "select nextval('claim_reference_seq')", nativeQuery = true)
 	long nextReferenceNumber();
+
+	/** A customer's own claims, newest first, for their home page. */
+	List<Claim> findByCustomerIdOrderBySubmittedAtDesc(UUID customerId);
+
+	/** The agent queue's "Submitted" tab: anyone's unassigned claims, oldest first. */
+	List<Claim> findByStatusOrderBySubmittedAtAsc(ClaimStatus status);
+
+	/** The other queue tabs: one agent's claims in the given statuses, oldest first. */
+	List<Claim> findByStatusInAndAssignedAgentIdOrderBySubmittedAtAsc(Collection<ClaimStatus> statuses, UUID agentId);
 
 }

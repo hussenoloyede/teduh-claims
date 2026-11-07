@@ -9,6 +9,10 @@ spring:
       # Flyway owns the schema. Hibernate only checks that the entities match the tables,
       # and refuses to start if they don't. It never changes a table itself.
       ddl-auto: validate
+  mvc:
+    # Spring's own errors (bad JSON, a missing field) come back in the same RFC 9457 shape as ours.
+    problemdetails:
+      enabled: true
   modulith:
     events:
       jdbc:

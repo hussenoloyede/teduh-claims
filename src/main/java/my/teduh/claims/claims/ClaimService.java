@@ -106,6 +106,25 @@ public class ClaimService {
 	}
 
 	@Transactional(readOnly = true)
+	public List<Claim> claimsOf(UUID customerId) {
+		return claims.findByCustomerIdOrderBySubmittedAtDesc(customerId);
+	}
+
+	/** One tab of the agent queue. Every tab is sorted oldest first, so the longest wait is at the top. */
+	@Transactional(readOnly = true)
+	public List<Claim> queue(QueueTab tab, UUID agentId) {
+		return switch (tab) {
+			case SUBMITTED -> claims.findByStatusOrderBySubmittedAtAsc(ClaimStatus.SUBMITTED);
+			case IN_REVIEW_BY_ME -> claims.findByStatusInAndAssignedAgentIdOrderBySubmittedAtAsc(
+					List.of(ClaimStatus.UNDER_REVIEW), agentId);
+			case WAITING_ON_CUSTOMER -> claims.findByStatusInAndAssignedAgentIdOrderBySubmittedAtAsc(
+					List.of(ClaimStatus.MORE_INFO_NEEDED), agentId);
+			case DECIDED -> claims.findByStatusInAndAssignedAgentIdOrderBySubmittedAtAsc(
+					List.of(ClaimStatus.APPROVED, ClaimStatus.REJECTED), agentId);
+		};
+	}
+
+	@Transactional(readOnly = true)
 	public Claim find(UUID claimId) {
 		return claims.findById(claimId).orElseThrow(() -> new ClaimNotFoundException(claimId));
 	}
