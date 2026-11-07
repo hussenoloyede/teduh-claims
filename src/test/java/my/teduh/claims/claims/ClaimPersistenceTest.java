@@ -19,6 +19,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import my.teduh.claims.TestcontainersConfiguration;
 
+import my.teduh.claims.policies.ClaimType;
+
 /**
  * Saves claims to a real PostgreSQL 18 in Docker, through the tables Flyway created.
  * Each step runs in its own transaction, the way separate web requests will.

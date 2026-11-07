@@ -1,7 +1,9 @@
-package my.teduh.claims.claims;
+package my.teduh.claims.policies;
 
 /**
- * What went wrong on the trip. No medical claims: the MVP holds no health data, even made-up data.
+ * What went wrong on the trip. It lives in the policies module because a policy decides which types it
+ * covers and up to how much; the claims module uses it from here.
+ * No medical claims: the MVP holds no health data, even made-up data.
  */
 public enum ClaimType {
 

@@ -19,6 +19,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import my.teduh.claims.policies.ClaimType;
+
 class ClaimTest {
 
 	private static final UUID AISYAH = UUID.fromString("00000000-0000-0000-0000-00000000000a");

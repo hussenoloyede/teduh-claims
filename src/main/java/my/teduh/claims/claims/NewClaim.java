@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import my.teduh.claims.policies.ClaimType;
+
 /**
  * What the customer sends when submitting a claim. The reference number and the time come from the system.
  * Checks that need the policy (cover dates, limit per claim type) happen in the claims service,

@@ -13,6 +13,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
+import my.teduh.claims.policies.ClaimType;
+
 /**
  * A travel insurance claim and the rules for moving it from one status to the next.
  * Plain Java on purpose: no Spring and no database here, so every rule can be unit tested in milliseconds.
