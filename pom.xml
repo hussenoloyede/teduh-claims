@@ -29,6 +29,8 @@
 	<properties>
 		<java.version>25</java.version>
 		<spring-modulith.version>2.1.1</spring-modulith.version>
+		<!-- Empty on purpose: JaCoCo adds its agent here later; Surefire appends Mockito's -->
+		<argLine></argLine>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -160,6 +162,27 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<!-- Sets a property holding the path of every dependency's jar, so the line below can find Mockito's -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>properties</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Load Mockito as an agent when tests start, instead of Mockito attaching itself at runtime,
+			     which newer Java versions will refuse -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar} -Xshare:off</argLine>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

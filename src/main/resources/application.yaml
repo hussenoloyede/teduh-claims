@@ -1,3 +1,7 @@
 spring:
   application:
     name: teduh-claims
+  jpa:
+    # Each service method loads what it needs inside its own transaction.
+    # Spring Boot's default (true) keeps a database session open for the whole web request.
+    open-in-view: false
