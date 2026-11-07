@@ -5,3 +5,13 @@ spring:
     # Each service method loads what it needs inside its own transaction.
     # Spring Boot's default (true) keeps a database session open for the whole web request.
     open-in-view: false
+    hibernate:
+      # Flyway owns the schema. Hibernate only checks that the entities match the tables,
+      # and refuses to start if they don't. It never changes a table itself.
+      ddl-auto: validate
+  modulith:
+    events:
+      jdbc:
+        # The event_publication table comes from our own Flyway migration (V2), not from Modulith.
+        schema-initialization:
+          enabled: false

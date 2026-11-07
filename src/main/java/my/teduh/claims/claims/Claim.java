@@ -1,8 +1,17 @@
 package my.teduh.claims.claims;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 /**
  * A travel insurance claim and the rules for moving it from one status to the next.
@@ -18,36 +27,91 @@ import java.util.UUID;
  *
  * Every action checks, in this order: the claim is in the right status, the right person is acting,
  * and what they sent is valid. A refused action changes nothing.
+ *
+ * The JPA annotations only tell Hibernate how to store the fields. They don't change the rules, and the
+ * class still works without a database, which is how ClaimTest uses it. Column names come from the field
+ * names: Spring Boot turns amountClaimed into amount_claimed.
  */
+@Entity
+@Table(name = "claims")
 public class Claim {
 
 	static final int MAX_MESSAGE_LENGTH = 1_000;
 	static final int MAX_NOTE_LENGTH = 500;
+	static final int MAX_DESCRIPTION_LENGTH = 500;
 
-	private final UUID id;
-	private final UUID customerId;
-	private final BigDecimal amountClaimed;
+	// Not final: Hibernate sets fields when it loads a claim from the database.
+	@Id
+	private UUID id;
+
+	private String reference;
+
+	private UUID customerId;
+
+	private UUID policyId;
+
+	@Enumerated(EnumType.STRING)
+	private ClaimType claimType;
+
+	private LocalDate incidentDate;
+
+	private BigDecimal amountClaimed;
+
+	private String description;
+
+	@Enumerated(EnumType.STRING)
 	private ClaimStatus status;
+
 	private UUID assignedAgentId;
+
 	private BigDecimal approvedAmount;
+
 	private String decisionReason;
 
-	private Claim(UUID id, UUID customerId, BigDecimal amountClaimed) {
+	private Instant submittedAt;
+
+	/**
+	 * Goes up by one on every save. Hibernate adds "and version = ?" to each update, so a save based on
+	 * an out-of-date copy matches no row and fails instead of overwriting someone else's change.
+	 * Null until the first save, which is also how Spring Data knows the claim is new.
+	 */
+	@Version
+	private Long version;
+
+	/** For Hibernate only. Code creates claims through submit(). */
+	protected Claim() {
+	}
+
+	private Claim(UUID id, String reference, NewClaim details, String description, Instant submittedAt) {
 		this.id = id;
-		this.customerId = customerId;
-		this.amountClaimed = amountClaimed;
+		this.reference = reference;
+		this.customerId = details.customerId();
+		this.policyId = details.policyId();
+		this.claimType = details.claimType();
+		this.incidentDate = details.incidentDate();
+		this.amountClaimed = details.amountClaimed();
+		this.description = description;
+		this.submittedAt = submittedAt;
 		this.status = ClaimStatus.SUBMITTED;
 	}
 
 	/** A customer submits a new claim. It always starts as SUBMITTED, with no agent. */
-	public static Claim submit(UUID customerId, BigDecimal amountClaimed) {
-		Objects.requireNonNull(customerId, "customerId");
-		Objects.requireNonNull(amountClaimed, "amountClaimed");
-		if (amountClaimed.signum() <= 0) {
+	public static Claim submit(String reference, NewClaim details, Instant submittedAt) {
+		Objects.requireNonNull(reference, "reference");
+		Objects.requireNonNull(details, "details");
+		Objects.requireNonNull(submittedAt, "submittedAt");
+		Objects.requireNonNull(details.customerId(), "customerId");
+		Objects.requireNonNull(details.policyId(), "policyId");
+		Objects.requireNonNull(details.claimType(), "claimType");
+		Objects.requireNonNull(details.incidentDate(), "incidentDate");
+		Objects.requireNonNull(details.amountClaimed(), "amountClaimed");
+		if (details.amountClaimed().signum() <= 0) {
 			throw new ClaimRuleException("The amount claimed must be more than zero.");
 		}
-		requireTwoDecimals(amountClaimed);
-		return new Claim(UUID.randomUUID(), customerId, amountClaimed);
+		requireTwoDecimals(details.amountClaimed());
+		String description = requireText(details.description(), MAX_DESCRIPTION_LENGTH,
+				"Tell us what happened.", "The description can be at most " + MAX_DESCRIPTION_LENGTH + " characters.");
+		return new Claim(UUID.randomUUID(), reference, details, description, submittedAt);
 	}
 
 	/** Any agent can pick up a submitted claim. From then on only that agent can act on it. */
@@ -166,8 +230,37 @@ public class Claim {
 		return id;
 	}
 
+	public String getReference() {
+		return reference;
+	}
+
 	public UUID getCustomerId() {
 		return customerId;
+	}
+
+	public UUID getPolicyId() {
+		return policyId;
+	}
+
+	public ClaimType getClaimType() {
+		return claimType;
+	}
+
+	public LocalDate getIncidentDate() {
+		return incidentDate;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public Instant getSubmittedAt() {
+		return submittedAt;
+	}
+
+	/** The version this copy was loaded at. Every change request will send it back. */
+	public Long getVersion() {
+		return version;
 	}
 
 	public BigDecimal getAmountClaimed() {

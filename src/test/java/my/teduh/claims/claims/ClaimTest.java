@@ -9,6 +9,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Nested;
@@ -24,10 +26,21 @@ class ClaimTest {
 	private static final UUID FARID = UUID.fromString("00000000-0000-0000-0000-00000000000f");
 	private static final UUID MEI_LING = UUID.fromString("00000000-0000-0000-0000-00000000000e");
 
+	private static final UUID TRAVEL_PLUS = UUID.fromString("00000000-0000-0000-0000-000000000001");
+
+	private static final String REFERENCE = "CLM-2026-000017";
+	private static final Instant SUBMITTED_AT = Instant.parse("2026-11-07T13:14:00Z");
+	private static final String WHAT_HAPPENED = "My checked luggage arrived 48 hours late in Kuala Lumpur.";
+
 	private static final String ASK = "Please upload the airline's delay report showing your bag arrived on 16 Oct.";
 
+	static NewClaim aisyahsDetails(String amount, String description) {
+		return new NewClaim(AISYAH, TRAVEL_PLUS, ClaimType.BAGGAGE_DELAYED, LocalDate.of(2026, 10, 14), rm(amount),
+				description);
+	}
+
 	private static Claim submitted() {
-		return Claim.submit(AISYAH, new BigDecimal("450.00"));
+		return Claim.submit(REFERENCE, aisyahsDetails("450.00", WHAT_HAPPENED), SUBMITTED_AT);
 	}
 
 	private static Claim underReviewByFarid() {
@@ -56,21 +69,41 @@ class ClaimTest {
 			assertThat(claim.getStatus()).isEqualTo(SUBMITTED);
 			assertThat(claim.getAssignedAgentId()).isNull();
 			assertThat(claim.getCustomerId()).isEqualTo(AISYAH);
+			assertThat(claim.getReference()).isEqualTo(REFERENCE);
+			assertThat(claim.getClaimType()).isEqualTo(ClaimType.BAGGAGE_DELAYED);
+			assertThat(claim.getSubmittedAt()).isEqualTo(SUBMITTED_AT);
+			assertThat(claim.getVersion()).isNull();
 		}
 
 		@ParameterizedTest
 		@ValueSource(strings = { "0", "0.00", "-10.00" })
 		void theAmountClaimedMustBeMoreThanZero(String amount) {
-			assertThatThrownBy(() -> Claim.submit(AISYAH, rm(amount)))
+			assertThatThrownBy(() -> Claim.submit(REFERENCE, aisyahsDetails(amount, WHAT_HAPPENED), SUBMITTED_AT))
 				.isInstanceOf(ClaimRuleException.class)
 				.hasMessage("The amount claimed must be more than zero.");
 		}
 
 		@Test
 		void amountsHaveAtMostTwoDecimalPlaces() {
-			assertThatThrownBy(() -> Claim.submit(AISYAH, rm("450.005")))
+			assertThatThrownBy(() -> Claim.submit(REFERENCE, aisyahsDetails("450.005", WHAT_HAPPENED), SUBMITTED_AT))
 				.isInstanceOf(ClaimRuleException.class)
 				.hasMessage("Amounts can have at most two decimal places.");
+		}
+
+		@ParameterizedTest
+		@NullAndEmptySource
+		@ValueSource(strings = { "  " })
+		void theCustomerMustSayWhatHappened(String description) {
+			assertThatThrownBy(() -> Claim.submit(REFERENCE, aisyahsDetails("450.00", description), SUBMITTED_AT))
+				.isInstanceOf(ClaimRuleException.class)
+				.hasMessage("Tell us what happened.");
+		}
+
+		@Test
+		void theDescriptionCanBeAtMostFiveHundredCharacters() {
+			assertThatThrownBy(() -> Claim.submit(REFERENCE, aisyahsDetails("450.00", "a".repeat(501)), SUBMITTED_AT))
+				.isInstanceOf(ClaimRuleException.class)
+				.hasMessage("The description can be at most 500 characters.");
 		}
 
 	}

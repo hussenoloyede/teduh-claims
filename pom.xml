@@ -71,7 +71,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.modulith</groupId>
-			<artifactId>spring-modulith-starter-jpa</artifactId>
+			<artifactId>spring-modulith-starter-jdbc</artifactId>
 		</dependency>
 
 		<dependency>
