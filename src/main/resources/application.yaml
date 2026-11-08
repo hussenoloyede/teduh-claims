@@ -25,6 +25,11 @@ spring:
         # The event_publication table comes from our own Flyway migration (V2), not from Modulith.
         schema-initialization:
           enabled: false
+      # Container Apps stops the app when it's idle. Any event stored but not yet delivered when that
+      # happens is delivered on the next start.
+      republish-outstanding-events-on-restart: true
+      # A delivered event's row is deleted, so event_publication only ever holds undelivered events.
+      completion-mode: delete
 
 server:
   servlet:
@@ -51,3 +56,11 @@ logging:
     # Azure's Java-HttpClient adapter warns on every upload that it can't set Content-Length itself.
     # Java's HttpClient sets that header from the body's size anyway, so the warning is only noise.
     com.azure.core.http.jdk.httpclient.JdkHttpClient: error
+
+management:
+  endpoint:
+    health:
+      # /actuator/health/liveness ("is the app alive?") and /readiness ("can it take requests?"),
+      # which Container Apps calls to decide when to send traffic and when to restart the container.
+      probes:
+        enabled: true

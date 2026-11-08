@@ -5,8 +5,14 @@ import java.time.Clock;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
 
+/**
+ * @EnableAsync lets event listeners run on a background thread, so a slow or failing notification never
+ * holds up or rolls back the claim change that caused it.
+ */
 @SpringBootApplication
+@EnableAsync
 public class TeduhClaimsApplication {
 
 	public static void main(String[] args) {

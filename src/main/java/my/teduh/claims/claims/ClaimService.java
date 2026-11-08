@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,14 +45,17 @@ public class ClaimService {
 
 	private final DocumentStore documents;
 
+	private final ApplicationEventPublisher publisher;
+
 	private final Clock clock;
 
 	ClaimService(ClaimRepository claims, ClaimEventRepository events, PolicyLookup policies, DocumentStore documents,
-			Clock clock) {
+			ApplicationEventPublisher publisher, Clock clock) {
 		this.claims = claims;
 		this.events = events;
 		this.policies = policies;
 		this.documents = documents;
+		this.publisher = publisher;
 		this.clock = clock;
 	}
 
@@ -93,6 +97,8 @@ public class ClaimService {
 		Claim claim = Claim.submit(reference, details, now);
 		claims.save(claim);
 		events.save(ClaimEvent.submitted(claim));
+		publisher.publishEvent(ClaimStatusChanged.of(claim,
+				new ClaimTransition(null, ClaimStatus.SUBMITTED, details.customerId(), null)));
 		documents.store(claim.getId(), details.customerId(), files);
 		return claim;
 	}
@@ -187,6 +193,8 @@ public class ClaimService {
 		}
 		ClaimTransition transition = action.apply(claim);
 		events.save(ClaimEvent.of(claim.getId(), transition, clock.instant()));
+		// Recorded in event_publication in this transaction; delivered to listeners only after it commits.
+		publisher.publishEvent(ClaimStatusChanged.of(claim, transition));
 		// No save(claim) needed: the claim was loaded in this transaction, so Hibernate writes its
 		// changes (and bumps the version) when the transaction commits.
 		return claim;
