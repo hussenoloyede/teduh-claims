@@ -1,6 +1,12 @@
 spring:
   application:
     name: teduh-claims
+  servlet:
+    multipart:
+      # Just above the app's own limits (10 MB a file, 5 files), so the app's checks answer first with a
+      # message about the file, and only something far larger is cut off here.
+      max-file-size: 11MB
+      max-request-size: 60MB
   jpa:
     # Each service method loads what it needs inside its own transaction.
     # Spring Boot's default (true) keeps a database session open for the whole web request.
@@ -32,3 +38,16 @@ server:
         http-only: true
         secure: true
         same-site: lax
+
+teduh:
+  storage:
+    # Where documents go. Set exactly one of these outside this file:
+    #   connection-string: Azurite, locally and in tests (the tests set it themselves)
+    #   endpoint: the storage account in Azure, reached with the app's managed identity
+    container: claim-documents
+
+logging:
+  level:
+    # Azure's Java-HttpClient adapter warns on every upload that it can't set Content-Length itself.
+    # Java's HttpClient sets that header from the body's size anyway, so the warning is only noise.
+    com.azure.core.http.jdk.httpclient.JdkHttpClient: error

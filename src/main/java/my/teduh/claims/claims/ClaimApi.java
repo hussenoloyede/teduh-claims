@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import jakarta.validation.constraints.NotNull;
 
+import my.teduh.claims.documents.StoredDocument;
 import my.teduh.claims.policies.ClaimType;
 
 /**
@@ -33,7 +34,7 @@ public final class ClaimApi {
 	public record RequestInfoRequest(@NotNull Long version, String message) {
 	}
 
-	/** Files join this request in week 3, when the documents module exists. */
+	/** Sent as the "response" part of a multipart request; the files travel as "files" parts beside it. */
 	public record RespondRequest(@NotNull Long version, String note) {
 	}
 
@@ -55,17 +56,18 @@ public final class ClaimApi {
 
 	}
 
-	/** One claim page: everything about the claim plus its timeline, oldest first. */
+	/** One claim page: everything about the claim, its documents, and its timeline, oldest first. */
 	public record ClaimDetails(UUID id, String reference, UUID policyId, ClaimType claimType, LocalDate incidentDate,
 			BigDecimal amountClaimed, String description, ClaimStatus status, UUID assignedAgentId,
 			BigDecimal approvedAmount, String decisionReason, Instant submittedAt, long version,
-			List<TimelineEntry> timeline) {
+			List<StoredDocument> documents, List<TimelineEntry> timeline) {
 
-		static ClaimDetails of(Claim claim, List<ClaimEvent> events) {
+		static ClaimDetails of(Claim claim, List<StoredDocument> documents, List<ClaimEvent> events) {
 			return new ClaimDetails(claim.getId(), claim.getReference(), claim.getPolicyId(), claim.getClaimType(),
 					claim.getIncidentDate(), claim.getAmountClaimed(), claim.getDescription(), claim.getStatus(),
 					claim.getAssignedAgentId(), claim.getApprovedAmount(), claim.getDecisionReason(),
-					claim.getSubmittedAt(), claim.getVersion(), events.stream().map(TimelineEntry::of).toList());
+					claim.getSubmittedAt(), claim.getVersion(), documents,
+					events.stream().map(TimelineEntry::of).toList());
 		}
 
 	}

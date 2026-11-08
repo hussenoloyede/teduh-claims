@@ -7,6 +7,8 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import my.teduh.claims.documents.DocumentRejectedException;
+
 /**
  * Turns the claims module's exceptions into RFC 9457 problem-details answers, the same shape ToolFleet used.
  * The frontend shows "detail" to the person; it is written for them, not for developers.
@@ -19,6 +21,14 @@ class ClaimErrorHandler {
 	ProblemDetail ruleBroken(ClaimRuleException e) {
 		ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(422), e.getMessage());
 		problem.setTitle("Not allowed");
+		return problem;
+	}
+
+	/** 422: a file that isn't a PDF, JPEG or PNG, is too large, or goes over a limit. Nothing was stored. */
+	@ExceptionHandler(DocumentRejectedException.class)
+	ProblemDetail fileRefused(DocumentRejectedException e) {
+		ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(422), e.getMessage());
+		problem.setTitle("File not accepted");
 		return problem;
 	}
 

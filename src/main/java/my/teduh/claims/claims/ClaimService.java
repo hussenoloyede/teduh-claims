@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -14,6 +15,10 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import my.teduh.claims.documents.DocumentStore;
+import my.teduh.claims.documents.DownloadLink;
+import my.teduh.claims.documents.StoredDocument;
+import my.teduh.claims.documents.UploadedFile;
 import my.teduh.claims.policies.PolicyCover;
 import my.teduh.claims.policies.PolicyLookup;
 import my.teduh.claims.shared.MalaysianTime;
@@ -37,20 +42,25 @@ public class ClaimService {
 
 	private final PolicyLookup policies;
 
+	private final DocumentStore documents;
+
 	private final Clock clock;
 
-	ClaimService(ClaimRepository claims, ClaimEventRepository events, PolicyLookup policies, Clock clock) {
+	ClaimService(ClaimRepository claims, ClaimEventRepository events, PolicyLookup policies, DocumentStore documents,
+			Clock clock) {
 		this.claims = claims;
 		this.events = events;
 		this.policies = policies;
+		this.documents = documents;
 		this.clock = clock;
 	}
 
 	/**
 	 * Checks the claim against the customer's policy, gives it the next reference number and saves it
-	 * with the first line of its timeline. From week 3 the files arrive in the same request.
+	 * with the first line of its timeline and its documents. All in one transaction: if a file is refused,
+	 * the claim isn't created either.
 	 */
-	public Claim submit(NewClaim details) {
+	public Claim submit(NewClaim details, List<UploadedFile> files) {
 		PolicyCover policy = policies.findForCustomer(details.policyId(), details.customerId())
 			.orElseThrow(() -> new ClaimRuleException("We couldn't find that policy on your account."));
 
@@ -74,11 +84,16 @@ public class ClaimService {
 			}
 		}
 
+		if (files.isEmpty()) {
+			throw new ClaimRuleException("Attach at least one document, such as a receipt or a letter from the airline.");
+		}
+
 		Instant now = clock.instant();
 		String reference = ClaimReference.format(now.atZone(MalaysianTime.ZONE).getYear(), claims.nextReferenceNumber());
 		Claim claim = Claim.submit(reference, details, now);
 		claims.save(claim);
 		events.save(ClaimEvent.submitted(claim));
+		documents.store(claim.getId(), details.customerId(), files);
 		return claim;
 	}
 
@@ -90,10 +105,17 @@ public class ClaimService {
 		return act(claimId, seenVersion, claim -> claim.requestInfo(agentId, message));
 	}
 
-	/** Someone else's claim answers 404 before any rule is checked, so the response reveals nothing about it. */
-	public Claim respond(UUID claimId, long seenVersion, UUID customerId, String note, boolean hasFiles) {
+	/**
+	 * Someone else's claim answers 404 before any rule is checked, so the response reveals nothing about it.
+	 * The files are stored only once the claim has accepted the response, and in the same transaction.
+	 */
+	public Claim respond(UUID claimId, long seenVersion, UUID customerId, String note, List<UploadedFile> files) {
 		findForCustomer(claimId, customerId);
-		return act(claimId, seenVersion, claim -> claim.respond(customerId, note, hasFiles));
+		Claim claim = act(claimId, seenVersion, c -> c.respond(customerId, note, !files.isEmpty()));
+		if (!files.isEmpty()) {
+			documents.store(claimId, customerId, files);
+		}
+		return claim;
 	}
 
 	public Claim approve(UUID claimId, long seenVersion, UUID agentId, BigDecimal amount, String reason) {
@@ -140,6 +162,17 @@ public class ClaimService {
 	@Transactional(readOnly = true)
 	public List<ClaimEvent> timeline(UUID claimId) {
 		return events.findByClaimIdOrderByOccurredAtAscIdAsc(claimId);
+	}
+
+	@Transactional(readOnly = true)
+	public List<StoredDocument> documents(UUID claimId) {
+		return documents.documentsOf(claimId);
+	}
+
+	/** Callers check the person may see the claim first; this only checks the document is the claim's. */
+	@Transactional(readOnly = true)
+	public Optional<DownloadLink> linkFor(UUID claimId, UUID documentId) {
+		return documents.linkFor(claimId, documentId);
 	}
 
 	/**

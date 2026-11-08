@@ -8,6 +8,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +25,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import my.teduh.claims.TestData;
 import my.teduh.claims.TestcontainersConfiguration;
 import my.teduh.claims.accounts.Role;
+import my.teduh.claims.documents.DocumentRejectedException;
+import my.teduh.claims.documents.UploadedFile;
 import my.teduh.claims.policies.ClaimType;
 
 /**
@@ -47,6 +50,13 @@ class ClaimServiceTest {
 
 	private static final UUID FARID = ClaimTest.FARID;
 	private static final UUID MEI_LING = ClaimTest.MEI_LING;
+	/** Made-up files: just enough bytes to start like a real PDF. */
+	private static final List<UploadedFile> RECEIPTS = List
+		.of(new UploadedFile("receipts.pdf", "%PDF-1.7\n% made-up receipts for tests\n%%EOF\n".getBytes()));
+
+	private static final List<UploadedFile> DELAY_REPORT = List
+		.of(new UploadedFile("delay-report.pdf", "%PDF-1.7\n% made-up delay report for tests\n%%EOF\n".getBytes()));
+
 	private static final String ASK = "Please upload the airline's delay report showing your bag arrived on 16 Oct.";
 
 	@Autowired
@@ -81,7 +91,7 @@ class ClaimServiceTest {
 	void aSubmittedClaimGetsAReferenceAndTheFirstLineOfItsTimeline() {
 		UUID policy = travelPlusFor(aisyah);
 
-		Claim claim = service.submit(baggageDelayed(policy, LocalDate.of(2026, 10, 14), "450.00"));
+		Claim claim = service.submit(baggageDelayed(policy, LocalDate.of(2026, 10, 14), "450.00"), RECEIPTS);
 
 		assertThat(claim.getReference()).matches("CLM-2026-\\d{6}");
 		assertThat(claim.getStatus()).isEqualTo(ClaimStatus.SUBMITTED);
@@ -98,7 +108,7 @@ class ClaimServiceTest {
 	void someoneElsesPolicyLooksLikeNoPolicy() {
 		UUID danielsPolicy = travelPlusFor(data.customer());
 
-		assertThatThrownBy(() -> service.submit(baggageDelayed(danielsPolicy, LocalDate.of(2026, 10, 14), "450.00")))
+		assertThatThrownBy(() -> service.submit(baggageDelayed(danielsPolicy, LocalDate.of(2026, 10, 14), "450.00"), RECEIPTS))
 			.isInstanceOf(ClaimRuleException.class)
 			.hasMessage("We couldn't find that policy on your account.");
 	}
@@ -107,7 +117,7 @@ class ClaimServiceTest {
 	void theIncidentMustBeInsideTheCoverPeriod() {
 		UUID policy = travelPlusFor(aisyah);
 
-		assertThatThrownBy(() -> service.submit(baggageDelayed(policy, LocalDate.of(2026, 9, 30), "450.00")))
+		assertThatThrownBy(() -> service.submit(baggageDelayed(policy, LocalDate.of(2026, 9, 30), "450.00"), RECEIPTS))
 			.isInstanceOf(ClaimRuleException.class)
 			.hasMessage("The incident date must be between 1 Oct 2026 and 31 Dec 2026, when your policy was active.");
 	}
@@ -117,7 +127,7 @@ class ClaimServiceTest {
 		UUID policy = travelPlusFor(aisyah);
 
 		// 8 Nov is inside the cover but after "today" (7 Nov in Malaysia).
-		assertThatThrownBy(() -> service.submit(baggageDelayed(policy, LocalDate.of(2026, 11, 8), "450.00")))
+		assertThatThrownBy(() -> service.submit(baggageDelayed(policy, LocalDate.of(2026, 11, 8), "450.00"), RECEIPTS))
 			.isInstanceOf(ClaimRuleException.class)
 			.hasMessage("The incident date can't be in the future.");
 	}
@@ -126,7 +136,7 @@ class ClaimServiceTest {
 	void todayCountsAsInThePast() {
 		UUID policy = travelPlusFor(aisyah);
 
-		Claim claim = service.submit(baggageDelayed(policy, LocalDate.of(2026, 11, 7), "450.00"));
+		Claim claim = service.submit(baggageDelayed(policy, LocalDate.of(2026, 11, 7), "450.00"), RECEIPTS);
 
 		assertThat(claim.getStatus()).isEqualTo(ClaimStatus.SUBMITTED);
 	}
@@ -135,19 +145,41 @@ class ClaimServiceTest {
 	void theAmountCannotExceedTheLimitForThatClaimType() {
 		UUID policy = travelPlusFor(aisyah);
 
-		assertThatThrownBy(() -> service.submit(baggageDelayed(policy, LocalDate.of(2026, 10, 14), "1000.01")))
+		assertThatThrownBy(() -> service.submit(baggageDelayed(policy, LocalDate.of(2026, 10, 14), "1000.01"), RECEIPTS))
 			.isInstanceOf(ClaimRuleException.class)
 			.hasMessage("Your limit for Baggage delayed is RM 1,000.00.");
+	}
+
+	@Test
+	void aClaimMustArriveWithAtLeastOneDocument() {
+		UUID policy = travelPlusFor(aisyah);
+
+		assertThatThrownBy(() -> service.submit(baggageDelayed(policy, LocalDate.of(2026, 10, 14), "450.00"), List.of()))
+			.isInstanceOf(ClaimRuleException.class)
+			.hasMessage("Attach at least one document, such as a receipt or a letter from the airline.");
+	}
+
+	@Test
+	void aRefusedFileMeansTheClaimIsNotCreatedEither() {
+		UUID policy = travelPlusFor(aisyah);
+		List<UploadedFile> oneGoodOneBad = List.of(RECEIPTS.getFirst(),
+				new UploadedFile("photo.png", "MZ not really a photo".getBytes()));
+
+		assertThatThrownBy(
+				() -> service.submit(baggageDelayed(policy, LocalDate.of(2026, 10, 14), "450.00"), oneGoodOneBad))
+			.isInstanceOf(DocumentRejectedException.class)
+			.hasMessage("photo.png isn't a PDF, JPEG or PNG.");
+		assertThat(service.claimsOf(aisyah)).isEmpty();
 	}
 
 	@Test
 	void theDemoStoryFromSubmitToApproval() {
 		UUID policy = travelPlusFor(aisyah);
 
-		Claim claim = service.submit(baggageDelayed(policy, LocalDate.of(2026, 10, 14), "450.00"));
+		Claim claim = service.submit(baggageDelayed(policy, LocalDate.of(2026, 10, 14), "450.00"), RECEIPTS);
 		claim = service.startReview(claim.getId(), claim.getVersion(), FARID);
 		claim = service.requestInfo(claim.getId(), claim.getVersion(), FARID, ASK);
-		claim = service.respond(claim.getId(), claim.getVersion(), aisyah, "Here is the delay report.", true);
+		claim = service.respond(claim.getId(), claim.getVersion(), aisyah, "Here is the delay report.", DELAY_REPORT);
 		claim = service.approve(claim.getId(), claim.getVersion(), FARID, new BigDecimal("400.00"),
 				"Receipts total RM 400.");
 
@@ -157,12 +189,15 @@ class ClaimServiceTest {
 		assertThat(service.timeline(claim.getId())).extracting(ClaimEvent::getToStatus)
 			.containsExactly(ClaimStatus.SUBMITTED, ClaimStatus.UNDER_REVIEW, ClaimStatus.MORE_INFO_NEEDED,
 					ClaimStatus.UNDER_REVIEW, ClaimStatus.APPROVED);
+		// In any order: the fixed clock gives both files the same upload time.
+		assertThat(service.documents(claim.getId())).extracting(document -> document.fileName())
+			.containsExactlyInAnyOrder("receipts.pdf", "delay-report.pdf");
 	}
 
 	@Test
 	void anActionBasedOnAnOldVersionIsRefusedBeforeAnyRuleIsChecked() {
 		UUID policy = travelPlusFor(aisyah);
-		Claim claim = service.submit(baggageDelayed(policy, LocalDate.of(2026, 10, 14), "450.00"));
+		Claim claim = service.submit(baggageDelayed(policy, LocalDate.of(2026, 10, 14), "450.00"), RECEIPTS);
 		long bothSaw = claim.getVersion();
 
 		service.startReview(claim.getId(), bothSaw, FARID);
@@ -177,7 +212,7 @@ class ClaimServiceTest {
 	@Test
 	void aRefusedActionLeavesNoTraceInTheTimeline() {
 		UUID policy = travelPlusFor(aisyah);
-		Claim claim = service.submit(baggageDelayed(policy, LocalDate.of(2026, 10, 14), "450.00"));
+		Claim claim = service.submit(baggageDelayed(policy, LocalDate.of(2026, 10, 14), "450.00"), RECEIPTS);
 		Claim underReview = service.startReview(claim.getId(), claim.getVersion(), FARID);
 
 		assertThatThrownBy(() -> service.approve(underReview.getId(), underReview.getVersion(), MEI_LING,

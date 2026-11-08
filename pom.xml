@@ -29,6 +29,7 @@
 	<properties>
 		<java.version>25</java.version>
 		<spring-modulith.version>2.1.1</spring-modulith.version>
+		<azure-sdk.version>1.3.8</azure-sdk.version>
 		<!-- Empty on purpose: JaCoCo adds its agent here later; Surefire appends Mockito's -->
 		<argLine></argLine>
 	</properties>
@@ -64,6 +65,33 @@
 		<dependency>
 			<groupId>org.springframework.modulith</groupId>
 			<artifactId>spring-modulith-observability-api</artifactId>
+		</dependency>
+		<!-- Azure Blob Storage for claim documents, and managed identity to reach it from Azure.
+		     Both normally bring an HTTP client built on Netty. It is swapped for one built on Java's own
+		     HttpClient, so Azure's Netty version can never clash with the one Spring Boot manages. -->
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-storage-blob</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.azure</groupId>
+					<artifactId>azure-core-http-netty</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-identity</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.azure</groupId>
+					<artifactId>azure-core-http-netty</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-core-http-jdk-httpclient</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.modulith</groupId>
@@ -151,6 +179,14 @@
 				<groupId>org.springframework.modulith</groupId>
 				<artifactId>spring-modulith-bom</artifactId>
 				<version>${spring-modulith.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- Picks versions of the Azure libraries that are tested together, like Spring Boot's parent does -->
+			<dependency>
+				<groupId>com.azure</groupId>
+				<artifactId>azure-sdk-bom</artifactId>
+				<version>${azure-sdk.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
