@@ -4,7 +4,7 @@ Project 4 of the SWE internship portfolio plan, started before project 1. A clai
 
 It is also the design-process showcase: Figma flows, a component library in Storybook, and a usability test with five classmates, written up as a case study.
 
-Status: scope agreed 7 November 2026. Week 1 setup is done the same day: Docker works on the PC, Java 25 is set up for this project, and the generated project builds and passes its first Testcontainers test (commit `69a7fff`). The companion doc `claude/Teduh Claims project guide.md` explains how each part works and why.
+Status: scope agreed 7 November 2026. Week 1 setup is done the same day: Docker works on the PC, Java 25 is set up for this project, and the generated project builds and passes its first Testcontainers test (commit `69a7fff`). Week 2 (claim state machine, database, policies, claims API) was done the same day, and week 3 (accounts and demo data, real sign-in with roles, ownership and CSRF, documents in Blob Storage) on 8 November, with 114 tests passing. The companion doc `claude/Teduh Claims project guide.md` explains how each part works and why.
 
 ## The demo story
 
@@ -88,7 +88,7 @@ SUBMITTED ──start review──▶ UNDER_REVIEW ──approve──▶ APPROV
 - Vitest and Testing Library for screens; Storybook stories with accessibility checks run in the same test run.
 - TypeScript types generated from the API's OpenAPI document, so a changed endpoint breaks the frontend build instead of the live site.
 - Azure DevOps pipeline: build, all tests, image build, push to the container registry, deploy to Azure Container Apps, on every push to main.
-- Azure: Container Apps (scale to zero), PostgreSQL Flexible Server on the free B1MS offer, Blob Storage, and a container registry. The app reaches the database, storage and registry with its managed identity; no passwords or keys anywhere.
+- Azure: Container Apps (scale to zero), PostgreSQL Flexible Server on the free B1MS offer, Blob Storage, and a public image on GitHub Container Registry. The app reaches the database and storage with its managed identity; no passwords or keys in the app. The only secret anywhere is the pipeline's GitHub token for pushing images.
 - Demo data resets itself: on startup, if the last reset was more than 24 hours ago, claims, documents, notifications and events are cleared and the seed data reloaded.
 
 ## Out of scope for the MVP
@@ -112,16 +112,17 @@ Good "What I'd do next" README items.
 
 | Method | Route | Who | Purpose |
 | --- | --- | --- | --- |
-| POST | `/api/auth/login` | Anyone | Sign in with email and password; starts a session |
+| GET | `/api/auth/csrf` | Anyone | Sets a fresh `XSRF-TOKEN` cookie; the app calls it on load and after signing in or out |
+| POST | `/api/auth/login` | Anyone | Sign in with a form holding `email` and `password`; starts a session, answers 204 |
 | POST | `/api/auth/logout` | Signed in | End the session |
 | GET | `/api/auth/me` | Signed in | Current user and role |
 | GET | `/api/policies` | Customer | The customer's policies with limits per claim type |
-| GET | `/api/claims` | Both | Customer: own claims. Agent: all claims, filter by status and "assigned to me" |
-| POST | `/api/claims` | Customer | Submit: multipart with the claim fields and 1 to 5 files |
+| GET | `/api/claims` | Both | Customer: own claims. Agent: one queue tab with `?tab=submitted` (the default), `in-review-by-me`, `waiting-on-customer` or `decided` |
+| POST | `/api/claims` | Customer | Submit: multipart with a `claim` JSON part and 1 to 5 `files` parts |
 | GET | `/api/claims/{id}` | Both | Claim with documents, timeline and current version |
 | POST | `/api/claims/{id}/start-review` | Agent | Assign to me, move to Under review |
 | POST | `/api/claims/{id}/request-info` | Assigned agent | Ask the customer for something |
-| POST | `/api/claims/{id}/respond` | Owner | Multipart: note and up to 5 files |
+| POST | `/api/claims/{id}/respond` | Owner | Multipart: a `response` JSON part (version, note) and up to 5 `files` parts |
 | POST | `/api/claims/{id}/approve` | Assigned agent | Amount and reason |
 | POST | `/api/claims/{id}/reject` | Assigned agent | Reason |
 | GET | `/api/claims/{id}/documents/{documentId}/link` | Owner or agent | A download link that expires after 15 minutes |
@@ -137,8 +138,8 @@ Every request that changes a claim sends the version number it read in its body.
 | Week | Goal | Done when |
 | --- | --- | --- |
 | 1 | Learn and frame | Spring and React starter tutorials done; Figma user flows and wireframes for both roles; empty repo builds (done 7 Nov); Docker running on the PC (done 7 Nov) |
-| 2 | Claims domain and database | State machine with unit tests; JPA entities, Flyway migration, endpoints without security; integration tests on Testcontainers PostgreSQL |
-| 3 | Security and documents | Sign-in, roles, ownership and CSRF with tests; upload to Azurite, file checks, download links |
+| 2 | Claims domain and database | State machine with unit tests; JPA entities, Flyway migration, endpoints without security; integration tests on Testcontainers PostgreSQL (done 7 Nov) |
+| 3 | Security and documents | Sign-in, roles, ownership and CSRF with tests; upload to Azurite, file checks, download links (done 8 Nov) |
 | 4 | Live early | Pipeline green; app running on Container Apps with the database and storage; notifications module working through events |
 | 5 | Design system | High-fidelity Figma screens and variables; tokens and shared components in Storybook with accessibility checks passing |
 | 6 | Screens | Customer and agent screens wired to the API; the demo story runs on the live link |
@@ -151,4 +152,21 @@ Keep applying with ToolFleet throughout. If a week runs over, protect week 4 (li
 
 - Docker on the PC: settled 7 November. Docker Desktop 4.98.0 runs on WSL 2 and the first Testcontainers test passed, so integration tests run locally as well as in the pipeline. The no-Docker fallback isn't needed.
 - The name: settled 7 November. No insurer or takaful operator called Teduh turned up. The nearest is Touch 'n Go's "Tenang" plans, a different word. Keep the look clearly separate from real insurers' colours and marks, and from Touch 'n Go's blue.
-- Container registry: still open, needed by week 4. Azure Container Registry Basic is about US$0.17 a day (about US$5 a month), the only fixed cost in the plan, and needs no secrets. The free alternative is a public image on GitHub Container Registry, which means a GitHub token in Azure DevOps that Hussein would type himself.
+- Container registry: settled 7 November. A public image on GitHub Container Registry (`ghcr.io/hussenoloyede/teduh-claims`), free, so the plan has no fixed monthly cost. The pipeline pushes with a classic GitHub token limited to `write:packages`, with an expiry, which Hussein creates and stores in an Azure DevOps service connection himself. Container Apps pulls the public image with no credentials. Azure Container Registry Basic (about US$5 a month, no token) was the alternative.
+
+## Decisions from week 2
+
+- `ClaimType` lives in the policies module, because a policy decides which types it covers and what each limit is. Claims depends on policies, never the other way.
+- Spring Modulith uses its JDBC starter, and Flyway creates its `event_publication` table, so Hibernate's `validate` check only ever looks at our own entities.
+- Every "now" comes from one `Clock` bean, and "today" means today in Malaysia (`Asia/Kuala_Lumpur`). Tests fix the clock at 7 Nov 2026, 9:14 pm.
+- The agent queue tabs in the API are `submitted`, `in-review-by-me`, `waiting-on-customer` and `decided`, matching the wireframes.
+- Until week 3, the acting user comes from an `X-Demo-User-Id` header and all requests are allowed. Both go when real sign-in lands, and the week 3 tests prove it.
+
+## Decisions from week 3
+
+- Sign-in uses Spring Security's own form login at `/api/auth/login` (form fields, 204 on success) rather than a hand-written JSON endpoint, so session fixation protection, CSRF token renewal and saving the session all come from Spring Security.
+- The CSRF token lives in a cookie the React app can read, and `GET /api/auth/csrf` hands out a fresh one, because Spring Security clears it at sign-in and sign-out.
+- The demo password (`teduh-demo`) is not a secret: the demo buttons will send it, so it will be in the frontend code. The demo accounts only ever see demo data.
+- An info request's message is kept on its timeline line (`claim_events.message`), so the planned `info_requests` table isn't needed.
+- Files go through the Azure SDK for Java with Java's own `HttpClient` in place of Netty, so its version can't clash with Spring Boot's. Azurite runs in Testcontainers as a plain container, since Spring Boot has no service connection for it.
+- Tests get CSRF tokens the way the browser does, never through Spring Security's `csrf()` test helper, which swaps the app's token store for the rest of the test run.
