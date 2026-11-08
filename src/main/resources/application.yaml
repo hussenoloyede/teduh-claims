@@ -32,6 +32,9 @@ spring:
       completion-mode: delete
 
 server:
+  # In Azure, HTTPS ends at the Container Apps front door, which passes the request on over plain HTTP and
+  # adds X-Forwarded-Proto: https. Trusting that header lets the app know the original request was HTTPS.
+  forward-headers-strategy: native
   servlet:
     session:
       # Signed out after 30 minutes without a request.

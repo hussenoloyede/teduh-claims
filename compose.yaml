@@ -1,0 +1,40 @@
+# A rehearsal for Azure on this PC: the app's Docker image next to PostgreSQL 18 and Azurite, the same
+# pieces the app will find in Azure. Started and checked by teduh-run\docker-smoke.bat.
+# The tests don't use this file; they start their own containers through Testcontainers.
+name: teduh-local
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: teduh
+      POSTGRES_USER: teduh
+      # A throwaway password for a database that only exists inside Docker on this PC, with no data kept.
+      # In Azure there is no password at all: the app signs in with its managed identity.
+      POSTGRES_PASSWORD: local-only
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "teduh", "-d", "teduh"]
+      interval: 2s
+      retries: 30
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.33.0
+    command: ["azurite-blob", "--blobHost", "0.0.0.0", "--skipApiVersionCheck", "--loose"]
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      azurite:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/teduh
+      SPRING_DATASOURCE_USERNAME: teduh
+      SPRING_DATASOURCE_PASSWORD: local-only
+      # Azurite's published development account; it only opens Azurite inside Docker on this PC.
+      TEDUH_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;"
+      # Locally there is no HTTPS, so the session cookie can't be HTTPS-only here. In Azure it stays secure.
+      SERVER_SERVLET_SESSION_COOKIE_SECURE: "false"

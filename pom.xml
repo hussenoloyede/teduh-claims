@@ -93,6 +93,20 @@
 			<groupId>com.azure</groupId>
 			<artifactId>azure-core-http-jdk-httpclient</artifactId>
 		</dependency>
+		<!-- Lets the PostgreSQL driver sign in to Azure with the app's managed identity instead of a password.
+		     Switched on only by the database address in Azure (authenticationPluginClassName=...);
+		     locally and in tests it sits unused. -->
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-identity-extensions</artifactId>
+			<version>1.2.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.azure</groupId>
+					<artifactId>azure-core-http-netty</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.modulith</groupId>
 			<artifactId>spring-modulith-starter-core</artifactId>

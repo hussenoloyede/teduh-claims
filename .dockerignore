@@ -1,0 +1,10 @@
+# Kept out of the Docker build, so the build is faster and nothing local ends up in the image.
+target/
+.git/
+.idea/
+.vscode/
+*.iml
+docs/
+HELP.md
+compose.yaml
+Dockerfile
