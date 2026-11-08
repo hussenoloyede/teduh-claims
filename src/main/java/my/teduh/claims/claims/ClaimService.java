@@ -90,7 +90,9 @@ public class ClaimService {
 		return act(claimId, seenVersion, claim -> claim.requestInfo(agentId, message));
 	}
 
+	/** Someone else's claim answers 404 before any rule is checked, so the response reveals nothing about it. */
 	public Claim respond(UUID claimId, long seenVersion, UUID customerId, String note, boolean hasFiles) {
+		findForCustomer(claimId, customerId);
 		return act(claimId, seenVersion, claim -> claim.respond(customerId, note, hasFiles));
 	}
 
@@ -124,6 +126,15 @@ public class ClaimService {
 	@Transactional(readOnly = true)
 	public Claim find(UUID claimId) {
 		return claims.findById(claimId).orElseThrow(() -> new ClaimNotFoundException(claimId));
+	}
+
+	/**
+	 * A customer's own claim. Someone else's claim throws the same ClaimNotFoundException as a made-up id:
+	 * answering 403 would confirm that a claim with that id exists.
+	 */
+	@Transactional(readOnly = true)
+	public Claim findForCustomer(UUID claimId, UUID customerId) {
+		return claims.findByIdAndCustomerId(claimId, customerId).orElseThrow(() -> new ClaimNotFoundException(claimId));
 	}
 
 	@Transactional(readOnly = true)

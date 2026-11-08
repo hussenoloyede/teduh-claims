@@ -1,7 +1,7 @@
 package my.teduh.claims.claims;
 
-import static my.teduh.claims.claims.ClaimController.DEMO_USER;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,14 +22,21 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 import com.jayway.jsonpath.JsonPath;
 
+import my.teduh.claims.BrowserCsrf;
 import my.teduh.claims.TestData;
 import my.teduh.claims.TestcontainersConfiguration;
+import my.teduh.claims.accounts.Role;
+import my.teduh.claims.accounts.SignedInUser;
 import my.teduh.claims.shared.MalaysianTime;
 
 /**
- * The /api/claims endpoints over HTTP, against real PostgreSQL. MockMvc sends requests through the whole
- * Spring web stack (JSON, validation, error handling) without opening a network port.
- * Every test makes its own users and policy, so the shared queue never confuses one test with another.
+ * The /api/claims endpoints over HTTP, against real PostgreSQL, with Spring Security switched on.
+ * MockMvc sends requests through the whole stack (security filters, JSON, validation, error handling)
+ * without opening a network port.
+ *
+ * user(...) puts a signed-in person on the request without going through the sign-in form; SignInTest
+ * covers the real sign-in. Changes carry a real CSRF token, fetched the way the browser does (BrowserCsrf).
+ * Every test makes its own people and policy, so the shared queue never confuses one test with another.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -44,18 +51,20 @@ class ClaimApiTest {
 
 	private TestData data;
 
-	private UUID aisyah;
-	private UUID farid;
-	private UUID meiLing;
+	private SignedInUser aisyah;
+	private SignedInUser daniel;
+	private SignedInUser farid;
+	private SignedInUser meiLing;
 
 	private final LocalDate today = LocalDate.now(MalaysianTime.ZONE);
 
 	@BeforeEach
 	void peopleExist() {
 		data = new TestData(jdbc);
-		aisyah = data.customer();
-		farid = data.agent();
-		meiLing = data.agent();
+		aisyah = signedIn(data.customer(), Role.CUSTOMER);
+		daniel = signedIn(data.customer(), Role.CUSTOMER);
+		farid = signedIn(data.agent(), Role.AGENT);
+		meiLing = signedIn(data.agent(), Role.AGENT);
 	}
 
 	@Test
@@ -65,7 +74,7 @@ class ClaimApiTest {
 		MvcTestResult result = post("/api/claims/" + id + "/start-review", farid, "{\"version\": 0}");
 		assertThat(result).hasStatus(HttpStatus.OK);
 		assertThat(read(result, "$.status")).isEqualTo("UNDER_REVIEW");
-		assertThat(read(result, "$.assignedAgentId")).isEqualTo(farid.toString());
+		assertThat(read(result, "$.assignedAgentId")).isEqualTo(farid.id().toString());
 
 		result = post("/api/claims/" + id + "/request-info", farid, """
 				{"version": 1, "message": "Please upload the airline's delay report."}""");
@@ -79,7 +88,7 @@ class ClaimApiTest {
 				{"version": 3, "amount": 400.00, "reason": "Receipts total RM 400."}""");
 		assertThat(result).hasStatus(HttpStatus.OK);
 
-		MvcTestResult page = mvc.get().uri("/api/claims/" + id).exchange();
+		MvcTestResult page = get("/api/claims/" + id, aisyah);
 		assertThat(page).hasStatus(HttpStatus.OK);
 		assertThat(read(page, "$.status")).isEqualTo("APPROVED");
 		assertThat(new BigDecimal(read(page, "$.approvedAmount").toString())).isEqualByComparingTo("400");
@@ -128,7 +137,7 @@ class ClaimApiTest {
 
 	@Test
 	void anUnknownClaimAnswers404() {
-		MvcTestResult result = mvc.get().uri("/api/claims/" + UUID.randomUUID()).exchange();
+		MvcTestResult result = get("/api/claims/" + UUID.randomUUID(), farid);
 
 		assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
 		assertThat(read(result, "$.detail")).isEqualTo("Claim not found.");
@@ -147,16 +156,35 @@ class ClaimApiTest {
 	void customersSeeOnlyTheirOwnClaims() {
 		String id = submitAisyahsClaim();
 
-		assertThat(idsIn(mvc.get().uri("/api/claims").header(DEMO_USER, aisyah.toString()).exchange()))
-			.contains(id);
-		assertThat(idsIn(mvc.get().uri("/api/claims").header(DEMO_USER, UUID.randomUUID().toString()).exchange()))
-			.doesNotContain(id);
+		assertThat(idsIn(get("/api/claims", aisyah))).contains(id);
+		assertThat(idsIn(get("/api/claims", daniel))).doesNotContain(id);
+	}
+
+	@Test
+	void someoneElsesClaimLooksExactlyLikeAClaimThatDoesntExist() {
+		String id = submitAisyahsClaim();
+
+		MvcTestResult opened = get("/api/claims/" + id, daniel);
+		MvcTestResult responded = post("/api/claims/" + id + "/respond", daniel, """
+				{"version": 0, "note": "Not my claim."}""");
+
+		assertThat(opened).hasStatus(HttpStatus.NOT_FOUND);
+		assertThat(read(opened, "$.detail")).isEqualTo("Claim not found.");
+		assertThat(responded).hasStatus(HttpStatus.NOT_FOUND);
+	}
+
+	@Test
+	void anyAgentCanOpenAnyClaim() {
+		String id = submitAisyahsClaim();
+
+		assertThat(get("/api/claims/" + id, meiLing)).hasStatus(HttpStatus.OK);
 	}
 
 	@Test
 	void aClaimMovesBetweenQueueTabsAsItIsWorked() {
 		String id = submitAisyahsClaim();
 		assertThat(idsIn(queue("submitted", farid))).contains(id);
+		assertThat(idsIn(get("/api/claims", farid))).as("Submitted is the default tab").contains(id);
 
 		post("/api/claims/" + id + "/start-review", farid, "{\"version\": 0}");
 
@@ -176,7 +204,53 @@ class ClaimApiTest {
 		assertThat(queue("everything", farid)).hasStatus(HttpStatus.BAD_REQUEST);
 	}
 
+	@Test
+	void aCustomerCantDoAnAgentsJob() {
+		String id = submitAisyahsClaim();
+
+		MvcTestResult result = post("/api/claims/" + id + "/start-review", aisyah, "{\"version\": 0}");
+
+		assertThat(result).hasStatus(HttpStatus.FORBIDDEN);
+		assertThat(read(result, "$.detail")).isEqualTo("You don't have access to that.");
+		assertThat(queue("submitted", aisyah)).as("customers have no queue").hasStatus(HttpStatus.FORBIDDEN);
+	}
+
+	@Test
+	void anAgentCantSubmitOrRespond() {
+		String id = submitAisyahsClaim();
+
+		assertThat(post("/api/claims", farid, submitBody(travelPlusFor(aisyah), "450.00")))
+			.hasStatus(HttpStatus.FORBIDDEN);
+		assertThat(post("/api/claims/" + id + "/respond", farid, """
+				{"version": 0, "note": "Pretending to be Aisyah."}""")).hasStatus(HttpStatus.FORBIDDEN);
+	}
+
+	@Test
+	void withoutSigningInEveryClaimsEndpointAnswers401() {
+		MvcTestResult result = mvc.get().uri("/api/claims").exchange();
+
+		assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
+		assertThat(read(result, "$.detail")).isEqualTo("Please sign in.");
+	}
+
+	@Test
+	void aChangeWithoutTheCsrfTokenIsRefused() {
+		MvcTestResult result = mvc.post()
+			.uri("/api/claims")
+			.with(user(aisyah))
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(submitBody(travelPlusFor(aisyah), "450.00"))
+			.exchange();
+
+		assertThat(result).hasStatus(HttpStatus.FORBIDDEN);
+		assertThat(idsIn(get("/api/claims", aisyah))).isEmpty();
+	}
+
 	// Helpers
+
+	private static SignedInUser signedIn(UUID id, Role role) {
+		return new SignedInUser(id, id + "@example.com", "not-for-sign-in", "Test user", role);
+	}
 
 	private String submitAisyahsClaim() {
 		MvcTestResult result = post("/api/claims", aisyah, submitBody(travelPlusFor(aisyah), "450.00"));
@@ -192,21 +266,26 @@ class ClaimApiTest {
 	}
 
 	/** A policy covering 60 days either side of today, so the test works whatever day it runs. */
-	private UUID travelPlusFor(UUID customer) {
-		return data.travelPlus(customer, today.minusDays(60), today.plusDays(60));
+	private UUID travelPlusFor(SignedInUser customer) {
+		return data.travelPlus(customer.id(), today.minusDays(60), today.plusDays(60));
 	}
 
-	private MvcTestResult post(String path, UUID user, String json) {
+	private MvcTestResult post(String path, SignedInUser who, String json) {
 		return mvc.post()
 			.uri(path)
-			.header(DEMO_USER, user.toString())
+			.with(user(who))
+			.with(BrowserCsrf.token(mvc))
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(json)
 			.exchange();
 	}
 
-	private MvcTestResult queue(String tab, UUID agent) {
-		return mvc.get().uri("/api/claims?tab=" + tab).header(DEMO_USER, agent.toString()).exchange();
+	private MvcTestResult get(String path, SignedInUser who) {
+		return mvc.get().uri(path).with(user(who)).exchange();
+	}
+
+	private MvcTestResult queue(String tab, SignedInUser who) {
+		return get("/api/claims?tab=" + tab, who);
 	}
 
 	private static Object read(MvcTestResult result, String path) {

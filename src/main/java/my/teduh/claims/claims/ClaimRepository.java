@@ -2,6 +2,7 @@ package my.teduh.claims.claims;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,6 +17,9 @@ interface ClaimRepository extends JpaRepository<Claim, UUID> {
 	/** The next number for a claim reference. Each call returns a new number, even across transactions. */
 	@Query(value = "select nextval('claim_reference_seq')", nativeQuery = true)
 	long nextReferenceNumber();
+
+	/** The claim, but only if it is this customer's. Someone else's claim comes back empty, like a made-up id. */
+	Optional<Claim> findByIdAndCustomerId(UUID id, UUID customerId);
 
 	/** A customer's own claims, newest first, for their home page. */
 	List<Claim> findByCustomerIdOrderBySubmittedAtDesc(UUID customerId);

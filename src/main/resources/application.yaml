@@ -19,3 +19,16 @@ spring:
         # The event_publication table comes from our own Flyway migration (V2), not from Modulith.
         schema-initialization:
           enabled: false
+
+server:
+  servlet:
+    session:
+      # Signed out after 30 minutes without a request.
+      timeout: 30m
+      cookie:
+        # The session cookie: JavaScript can't read it (http-only), it only travels over HTTPS (secure;
+        # browsers make an exception for http://localhost), and other sites' pages can't make the browser
+        # send it with their POSTs (same-site lax).
+        http-only: true
+        secure: true
+        same-site: lax
