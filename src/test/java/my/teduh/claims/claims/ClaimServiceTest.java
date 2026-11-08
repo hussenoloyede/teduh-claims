@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +21,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import my.teduh.claims.TestData;
 import my.teduh.claims.TestcontainersConfiguration;
+import my.teduh.claims.accounts.Role;
 import my.teduh.claims.policies.ClaimType;
 
 /**
@@ -42,8 +45,8 @@ class ClaimServiceTest {
 
 	}
 
-	private static final UUID FARID = UUID.fromString("00000000-0000-0000-0000-00000000000f");
-	private static final UUID MEI_LING = UUID.fromString("00000000-0000-0000-0000-00000000000e");
+	private static final UUID FARID = ClaimTest.FARID;
+	private static final UUID MEI_LING = ClaimTest.MEI_LING;
 	private static final String ASK = "Please upload the airline's delay report showing your bag arrived on 16 Oct.";
 
 	@Autowired
@@ -52,21 +55,21 @@ class ClaimServiceTest {
 	@Autowired
 	private JdbcTemplate jdbc;
 
-	private final UUID aisyah = UUID.randomUUID();
+	private TestData data;
+
+	private UUID aisyah;
+
+	@BeforeEach
+	void peopleExist() {
+		data = new TestData(jdbc);
+		aisyah = data.customer();
+		data.user(FARID, Role.AGENT);
+		data.user(MEI_LING, Role.AGENT);
+	}
 
 	/** Teduh Travel Plus for one customer: cover 1 Oct to 31 Dec 2026, with the four limits from the scope. */
 	private UUID travelPlusFor(UUID customer) {
-		UUID policy = UUID.randomUUID();
-		jdbc.update("""
-				insert into policies (id, policy_number, customer_id, plan_name, cover_start, cover_end)
-				values (?, ?, ?, 'Teduh Travel Plus', date '2026-10-01', date '2026-12-31')""",
-				policy, "TT-" + policy.toString().substring(0, 8), customer);
-		String limit = "insert into policy_limits (policy_id, claim_type, limit_amount) values (?, ?, ?)";
-		jdbc.update(limit, policy, "FLIGHT_DELAY", new BigDecimal("500.00"));
-		jdbc.update(limit, policy, "BAGGAGE_DELAYED", new BigDecimal("1000.00"));
-		jdbc.update(limit, policy, "LOST_OR_DAMAGED_BAGGAGE", new BigDecimal("3000.00"));
-		jdbc.update(limit, policy, "TRIP_CANCELLATION", new BigDecimal("10000.00"));
-		return policy;
+		return data.travelPlus(customer, LocalDate.of(2026, 10, 1), LocalDate.of(2026, 12, 31));
 	}
 
 	private NewClaim baggageDelayed(UUID policy, LocalDate incident, String amount) {
@@ -93,7 +96,7 @@ class ClaimServiceTest {
 
 	@Test
 	void someoneElsesPolicyLooksLikeNoPolicy() {
-		UUID danielsPolicy = travelPlusFor(UUID.randomUUID());
+		UUID danielsPolicy = travelPlusFor(data.customer());
 
 		assertThatThrownBy(() -> service.submit(baggageDelayed(danielsPolicy, LocalDate.of(2026, 10, 14), "450.00")))
 			.isInstanceOf(ClaimRuleException.class)

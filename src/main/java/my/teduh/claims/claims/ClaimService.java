@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -17,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import my.teduh.claims.policies.PolicyCover;
 import my.teduh.claims.policies.PolicyLookup;
+import my.teduh.claims.shared.MalaysianTime;
 
 /**
  * Everything that happens to a claim goes through here. Each public method is one database transaction:
@@ -28,9 +28,6 @@ import my.teduh.claims.policies.PolicyLookup;
 @Service
 @Transactional
 public class ClaimService {
-
-	/** Teduh is a Malaysian insurer, so "today" and the reference year follow Malaysian time, not UTC. */
-	static final ZoneId MALAYSIA = ZoneId.of("Asia/Kuala_Lumpur");
 
 	private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
 
@@ -57,7 +54,7 @@ public class ClaimService {
 		PolicyCover policy = policies.findForCustomer(details.policyId(), details.customerId())
 			.orElseThrow(() -> new ClaimRuleException("We couldn't find that policy on your account."));
 
-		LocalDate today = LocalDate.now(clock.withZone(MALAYSIA));
+		LocalDate today = MalaysianTime.today(clock);
 		if (details.incidentDate() != null) {
 			if (details.incidentDate().isAfter(today)) {
 				throw new ClaimRuleException("The incident date can't be in the future.");
@@ -78,7 +75,7 @@ public class ClaimService {
 		}
 
 		Instant now = clock.instant();
-		String reference = ClaimReference.format(now.atZone(MALAYSIA).getYear(), claims.nextReferenceNumber());
+		String reference = ClaimReference.format(now.atZone(MalaysianTime.ZONE).getYear(), claims.nextReferenceNumber());
 		Claim claim = Claim.submit(reference, details, now);
 		claims.save(claim);
 		events.save(ClaimEvent.submitted(claim));

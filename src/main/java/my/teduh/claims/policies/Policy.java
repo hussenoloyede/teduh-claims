@@ -47,6 +47,21 @@ class Policy {
 	protected Policy() {
 	}
 
+	Policy(UUID id, String policyNumber, UUID customerId, String planName, LocalDate coverStart, LocalDate coverEnd,
+			Map<ClaimType, BigDecimal> limits) {
+		this.id = id;
+		this.policyNumber = policyNumber;
+		this.customerId = customerId;
+		this.planName = planName;
+		this.coverStart = coverStart;
+		this.coverEnd = coverEnd;
+		this.limits = new HashMap<>(limits);
+	}
+
+	UUID getId() {
+		return id;
+	}
+
 	PolicyCover toCover() {
 		return new PolicyCover(id, customerId, policyNumber, planName, coverStart, coverEnd, limits);
 	}

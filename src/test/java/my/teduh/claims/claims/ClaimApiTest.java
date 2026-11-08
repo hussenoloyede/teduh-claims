@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +22,9 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 import com.jayway.jsonpath.JsonPath;
 
+import my.teduh.claims.TestData;
 import my.teduh.claims.TestcontainersConfiguration;
+import my.teduh.claims.shared.MalaysianTime;
 
 /**
  * The /api/claims endpoints over HTTP, against real PostgreSQL. MockMvc sends requests through the whole
@@ -40,11 +42,21 @@ class ClaimApiTest {
 	@Autowired
 	private JdbcTemplate jdbc;
 
-	private final UUID aisyah = UUID.randomUUID();
-	private final UUID farid = UUID.randomUUID();
-	private final UUID meiLing = UUID.randomUUID();
+	private TestData data;
 
-	private final LocalDate today = LocalDate.now(ZoneId.of("Asia/Kuala_Lumpur"));
+	private UUID aisyah;
+	private UUID farid;
+	private UUID meiLing;
+
+	private final LocalDate today = LocalDate.now(MalaysianTime.ZONE);
+
+	@BeforeEach
+	void peopleExist() {
+		data = new TestData(jdbc);
+		aisyah = data.customer();
+		farid = data.agent();
+		meiLing = data.agent();
+	}
 
 	@Test
 	void theDemoStoryOverHttp() {
@@ -181,14 +193,7 @@ class ClaimApiTest {
 
 	/** A policy covering 60 days either side of today, so the test works whatever day it runs. */
 	private UUID travelPlusFor(UUID customer) {
-		UUID policy = UUID.randomUUID();
-		jdbc.update("""
-				insert into policies (id, policy_number, customer_id, plan_name, cover_start, cover_end)
-				values (?, ?, ?, 'Teduh Travel Plus', ?, ?)""",
-				policy, "TT-" + policy.toString().substring(0, 8), customer, today.minusDays(60), today.plusDays(60));
-		jdbc.update("insert into policy_limits (policy_id, claim_type, limit_amount) values (?, ?, ?)", policy,
-				"BAGGAGE_DELAYED", new BigDecimal("1000.00"));
-		return policy;
+		return data.travelPlus(customer, today.minusDays(60), today.plusDays(60));
 	}
 
 	private MvcTestResult post(String path, UUID user, String json) {

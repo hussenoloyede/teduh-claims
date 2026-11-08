@@ -5,9 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,8 +19,9 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import my.teduh.claims.TestData;
 import my.teduh.claims.TestcontainersConfiguration;
-
+import my.teduh.claims.accounts.Role;
 import my.teduh.claims.policies.ClaimType;
 
 /**
@@ -29,8 +32,8 @@ import my.teduh.claims.policies.ClaimType;
 @Import(TestcontainersConfiguration.class)
 class ClaimPersistenceTest {
 
-	private static final UUID FARID = UUID.fromString("00000000-0000-0000-0000-00000000000f");
-	private static final UUID MEI_LING = UUID.fromString("00000000-0000-0000-0000-00000000000e");
+	private static final UUID FARID = ClaimTest.FARID;
+	private static final UUID MEI_LING = ClaimTest.MEI_LING;
 	private static final Instant SUBMITTED_AT = Instant.parse("2026-11-07T13:14:00Z");
 
 	@Autowired
@@ -44,6 +47,16 @@ class ClaimPersistenceTest {
 
 	@Autowired
 	private JdbcTemplate jdbc;
+
+	/** The foreign keys need the people and the policy behind ClaimTest's claim to be real rows. */
+	@BeforeEach
+	void peopleAndPolicyExist() {
+		TestData data = new TestData(jdbc);
+		data.user(ClaimTest.AISYAH, Role.CUSTOMER);
+		data.user(FARID, Role.AGENT);
+		data.user(MEI_LING, Role.AGENT);
+		data.travelPlus(ClaimTest.TRAVEL_PLUS, ClaimTest.AISYAH, LocalDate.of(2026, 10, 1), LocalDate.of(2026, 12, 31));
+	}
 
 	private Claim newClaim() {
 		String reference = ClaimReference.format(2026, claims.nextReferenceNumber());

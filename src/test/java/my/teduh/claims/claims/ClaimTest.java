@@ -23,12 +23,12 @@ import my.teduh.claims.policies.ClaimType;
 
 class ClaimTest {
 
-	private static final UUID AISYAH = UUID.fromString("00000000-0000-0000-0000-00000000000a");
+	static final UUID AISYAH = UUID.fromString("00000000-0000-0000-0000-00000000000a");
 	private static final UUID DANIEL = UUID.fromString("00000000-0000-0000-0000-00000000000d");
-	private static final UUID FARID = UUID.fromString("00000000-0000-0000-0000-00000000000f");
-	private static final UUID MEI_LING = UUID.fromString("00000000-0000-0000-0000-00000000000e");
+	static final UUID FARID = UUID.fromString("00000000-0000-0000-0000-00000000000f");
+	static final UUID MEI_LING = UUID.fromString("00000000-0000-0000-0000-00000000000e");
 
-	private static final UUID TRAVEL_PLUS = UUID.fromString("00000000-0000-0000-0000-000000000001");
+	static final UUID TRAVEL_PLUS = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
 	private static final String REFERENCE = "CLM-2026-000017";
 	private static final Instant SUBMITTED_AT = Instant.parse("2026-11-07T13:14:00Z");
