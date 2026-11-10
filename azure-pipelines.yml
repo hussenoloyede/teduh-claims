@@ -1,0 +1,152 @@
+# Teduh Claims CI/CD, run by Azure DevOps (project TeduhClaims) on every push and pull request.
+#
+#   Test    every change: build with Java 25 and run all tests against real PostgreSQL and Azurite in Docker
+#   Image   main only: build the Docker image and push it to ghcr.io/hussenoloyede/teduh-claims
+#   Deploy  main only: point the container app at the new image and wait until it reports ready
+#
+# Two service connections, both created by hand in Project settings (see docs, step 4d):
+#   ghcr-teduh   Docker Registry, ghcr.io, a GitHub token limited to write:packages
+#   teduh-azure  Azure Resource Manager, workload identity federation, scoped to teduh-rg (no secret)
+# Nothing secret is in this file. The app itself gets its database and storage access from its managed identity.
+
+trigger:
+  branches:
+    include: [main]
+
+pr:
+  branches:
+    include: [main]
+
+pool:
+  vmImage: ubuntu-24.04
+
+variables:
+  imageRepository: hussenoloyede/teduh-claims
+  imageTag: $(Build.BuildId)
+  resourceGroup: teduh-rg
+  containerApp: teduh-claims
+  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+
+stages:
+  - stage: Test
+    displayName: Build and test
+    jobs:
+      - job: Api
+        displayName: Java 25, real PostgreSQL and Azurite in Docker
+        steps:
+          # Keeps downloaded libraries between runs; the key changes whenever pom.xml does.
+          - task: Cache@2
+            displayName: Cache Maven libraries
+            inputs:
+              key: 'maven | "$(Agent.OS)" | pom.xml'
+              restoreKeys: |
+                maven | "$(Agent.OS)"
+              path: $(MAVEN_CACHE_FOLDER)
+
+          # Use the agent's own Java 25 if the image has one, otherwise download Temurin 25.
+          - bash: |
+              set -euo pipefail
+              if [ -n "${JAVA_HOME_25_X64:-}" ]; then
+                JDK="$JAVA_HOME_25_X64"
+                echo "Using the agent's Java 25 at $JDK"
+              else
+                JDK="$(Agent.ToolsDirectory)/temurin-25"
+                mkdir -p "$JDK"
+                curl -fsSL "https://api.adoptium.net/v3/binary/latest/25/ga/linux/x64/jdk/hotspot/normal/eclipse" \
+                  | tar -xz -C "$JDK" --strip-components=1
+                echo "Downloaded Temurin 25 to $JDK"
+              fi
+              echo "##vso[task.setvariable variable=JAVA_HOME]$JDK"
+              echo "##vso[task.prependpath]$JDK/bin"
+            displayName: Set up Java 25
+
+          # Docker is already on Microsoft-hosted Ubuntu agents, so Testcontainers works as it does locally.
+          # "sh ./mvnw" because git stores mvnw without the run permission (it was committed from Windows).
+          - bash: |
+              java -version
+              sh ./mvnw --batch-mode --no-transfer-progress verify -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)
+            displayName: mvnw verify
+
+          - task: PublishTestResults@2
+            displayName: Publish test results
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: JUnit
+              testResultsFiles: '**/surefire-reports/TEST-*.xml'
+              testRunTitle: Teduh Claims tests
+
+  - stage: Image
+    displayName: Build and push the image
+    dependsOn: Test
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - job: BuildAndPush
+        displayName: ghcr.io/$(imageRepository)
+        steps:
+          # The registry address comes from the ghcr-teduh connection, so the image is pushed as
+          # ghcr.io/hussenoloyede/teduh-claims:<build id> and :latest.
+          - task: Docker@2
+            displayName: Build and push
+            inputs:
+              command: buildAndPush
+              containerRegistry: ghcr-teduh
+              repository: $(imageRepository)
+              dockerfile: Dockerfile
+              buildContext: .
+              tags: |
+                $(imageTag)
+                latest
+            env:
+              DOCKER_BUILDKIT: 1
+
+  - stage: Deploy
+    displayName: Deploy to Azure Container Apps
+    dependsOn: Image
+    condition: succeeded()
+    jobs:
+      # A deployment job records each deploy in the teduh-live environment's history.
+      - deployment: ContainerApp
+        displayName: teduh-claims
+        environment: teduh-live
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureCLI@2
+                  displayName: Deploy the new image and wait until it's ready
+                  inputs:
+                    azureSubscription: teduh-azure
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      set -euo pipefail
+                      az extension add --name containerapp --upgrade --allow-preview true --only-show-errors
+
+                      # The app listens on 8080 (the placeholder image used 80).
+                      az containerapp ingress update -n $(containerApp) -g $(resourceGroup) --target-port 8080 -o none
+
+                      # The database address switches on the passwordless plugin: the driver signs in as the app's
+                      # managed identity, whose database role is called teduh-claims. Storage is reached the same way.
+                      az containerapp update -n $(containerApp) -g $(resourceGroup) \
+                        --image ghcr.io/$(imageRepository):$(imageTag) \
+                        --cpu 0.5 --memory 1.0Gi \
+                        --set-env-vars \
+                          "SPRING_DATASOURCE_URL=jdbc:postgresql://teduh-pg-hussein.postgres.database.azure.com:5432/teduh?sslmode=require&authenticationPluginClassName=com.azure.identity.extensions.jdbc.postgresql.AzurePostgresqlAuthenticationPlugin" \
+                          "SPRING_DATASOURCE_USERNAME=teduh-claims" \
+                          "TEDUH_STORAGE_ENDPOINT=https://teduhhussein.blob.core.windows.net" \
+                        -o none
+
+                      # The app may be scaled to zero, and Spring Boot takes a while to start on 0.5 CPU, so wait.
+                      FQDN=$(az containerapp show -n $(containerApp) -g $(resourceGroup) \
+                        --query properties.configuration.ingress.fqdn -o tsv)
+                      echo "Waiting for https://$FQDN/actuator/health/readiness"
+                      for attempt in $(seq 1 36); do
+                        if curl -fsS --max-time 10 "https://$FQDN/actuator/health/readiness"; then
+                          echo
+                          echo "Ready: https://$FQDN"
+                          exit 0
+                        fi
+                        sleep 10
+                      done
+                      echo "##vso[task.logissue type=error]Not ready after 6 minutes. See the app's log stream in the portal."
+                      exit 1
