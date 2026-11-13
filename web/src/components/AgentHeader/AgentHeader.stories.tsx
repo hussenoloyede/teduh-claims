@@ -13,7 +13,7 @@ const meta = {
     ],
     unreadCount: 2,
     userName: 'Farid Hassan',
-    userRole: 'Claims agent',
+    userRole: 'Claims officer',
     onSignOut: fn(),
   },
   globals: { theme: 'agent' },

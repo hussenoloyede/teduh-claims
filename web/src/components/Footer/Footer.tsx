@@ -4,7 +4,7 @@ import styles from './Footer.module.css';
 export function Footer() {
   return (
     <footer className={styles.footer}>
-      <p>Teduh is a fictional insurer made for a portfolio project.</p>
+      <p>Teduh is a fictional insurer made for a portfolio project. Don't upload real documents.</p>
     </footer>
   );
 }

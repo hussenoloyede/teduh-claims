@@ -12,7 +12,7 @@ type AgentHeaderProps = {
   nav: AgentNavItem[];
   unreadCount: number;
   userName: string;
-  /** Shown under the name, for example "Claims agent". */
+  /** Shown under the name, for example "Claims officer". */
   userRole: string;
   onSignOut: () => void;
 };
