@@ -8,3 +8,8 @@ docs/
 HELP.md
 compose.yaml
 Dockerfile
+# The Docker build runs its own npm ci on Linux. Windows' node_modules would be large and hold the wrong binaries.
+web/node_modules/
+web/dist/
+web/storybook-static/
+web/*.log

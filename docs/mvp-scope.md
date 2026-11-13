@@ -4,7 +4,7 @@ Project 4 of the SWE internship portfolio plan, started before project 1. A clai
 
 It is also the design-process showcase: Figma flows, a component library in Storybook, and a usability test with five classmates, written up as a case study.
 
-Status: scope agreed 7 November 2026. Week 1 setup is done the same day: Docker works on the PC, Java 25 is set up for this project, and the generated project builds and passes its first Testcontainers test (commit `69a7fff`). Week 2 (claim state machine, database, policies, claims API) was done the same day, and week 3 (accounts and demo data, real sign-in with roles, ownership and CSRF, documents in Blob Storage) on 8 November, with 114 tests passing. Week 4 (notifications, Docker image, Azure resources and the Azure DevOps pipeline) was done on 10 November: 121 tests pass and the API is live at https://teduh-claims.grayisland-5bebc3bc.eastasia.azurecontainerapps.io, deployed on every push to main. The companion doc `claude/Teduh Claims project guide.md` explains how each part works and why.
+Status: scope agreed 7 November 2026. Week 1 setup is done the same day: Docker works on the PC, Java 25 is set up for this project, and the generated project builds and passes its first Testcontainers test (commit `69a7fff`). Week 2 (claim state machine, database, policies, claims API) was done the same day, and week 3 (accounts and demo data, real sign-in with roles, ownership and CSRF, documents in Blob Storage) on 8 November, with 114 tests passing. Week 4 (notifications, Docker image, Azure resources and the Azure DevOps pipeline) was done on 10 November: 121 tests pass and the API is live at https://teduh-claims.grayisland-5bebc3bc.eastasia.azurecontainerapps.io, deployed on every push to main. Week 5 (design system) is under way: Hussein's Hi-Fi 2.0 screens and the Figma variables are done, and `web/` holds the React app with the design tokens and ten shared components in Storybook, 47 frontend tests passing (commit `edeb71f`). The companion doc `claude/Teduh Claims project guide.md` explains how each part works and why.
 
 ## The demo story
 
@@ -141,7 +141,7 @@ Every request that changes a claim sends the version number it read in its body.
 | 2 | Claims domain and database | State machine with unit tests; JPA entities, Flyway migration, endpoints without security; integration tests on Testcontainers PostgreSQL (done 7 Nov) |
 | 3 | Security and documents | Sign-in, roles, ownership and CSRF with tests; upload to Azurite, file checks, download links (done 8 Nov) |
 | 4 | Live early | Pipeline green; app running on Container Apps with the database and storage; notifications module working through events (done 10 Nov) |
-| 5 | Design system | High-fidelity Figma screens and variables; tokens and shared components in Storybook with accessibility checks passing |
+| 5 | Design system | High-fidelity Figma screens and variables; tokens and shared components in Storybook with accessibility checks passing (components done 14 Nov); the pipeline builds and tests the web app, and the image serves it with the Storybook |
 | 6 | Screens | Customer and agent screens wired to the API; the demo story runs on the live link |
 | 7 | Usability test | Five sessions done, findings rated, top fixes shipped |
 | 8 | Polish and story | README with GIF, architecture diagram, CI badge and case study; reset logic; LinkedIn post |
@@ -180,3 +180,16 @@ Keep applying with ToolFleet throughout. If a week runs over, protect week 4 (li
 - At most one replica, because sessions are held in memory.
 - `docs/azure-setup.md` stays out of the public repo (`.git/info/exclude`); a private copy is in the project.
 - The Azure DevOps project is private (the organisation allows no public projects), so the README will show a status badge and a screenshot of a green run.
+
+## Decisions from week 5
+
+- The screens are Hussein's "Hi-Fi 2.0" page in Figma: 15 customer screens (C01 to C15, including Claims, Policies and Profile behind the bottom nav) and 12 agent screens (A01 to A12, including Assigned reviews and History behind the header nav). Every page maps to an endpoint that already exists.
+- Design tokens follow Hi-Fi 2.0: dark green for the customer app, blue for the agent app. In Figma they are one Color collection with a Customer mode and an Agent mode; in code, `web/src/tokens.css` with `[data-theme="agent"]` overriding the colours. Three greys and the agent green were darkened slightly so text passes 4.5:1.
+- Type: Inter for body text (11 to 16 px), Plus Jakarta Sans for headings (18 to 28 px), and an Overline style for the uppercase labels.
+- Left out of the MVP even though the screens show them, and listed in the README as what comes next: DuitNow payouts, the emergency hotline, dispute and re-review, PDF downloads, Remember me and Forgot password, and the illustrative KPI figures on the agent queue.
+- The React app is generated with the official Vite template (React 19, TypeScript) and Storybook 10 with its docs, test and accessibility add-ons.
+- No UI kit: the components are Hussein's own, styled with CSS Modules and the tokens. Icons come from lucide-react. People are shown as initials, never photos.
+- Where the build differs from Hi-Fi 2.0 on purpose: documents say Download rather than View (the links download as attachments); the claim card shows the claimed amount only, because the claim summary has no approved amount; the timeline has no time estimates or SLA text; the current bottom tab gets a pale pill and the unread dot a darker rim, because colour alone was too faint; labels are in sentence case.
+- Every date and time is shown in Malaysian time (`Asia/Kuala_Lumpur`), whatever the browser's own time zone, through one formatting module with its own unit tests.
+- The Docker image builds the React app and the Storybook in a Node stage, and Spring Boot serves them from the jar: the app at `/`, the Storybook at `/storybook/`. Pages may be shown in frames from Teduh itself only (`X-Frame-Options: SAMEORIGIN`), which the Storybook needs.
+- The pipeline's Test stage runs a Web job next to the Java job: lint, type check and build, the unit tests and every story in headless Chromium with axe, and the Storybook build. Either failing stops the image and the deploy.

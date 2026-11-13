@@ -1,7 +1,11 @@
 # Teduh Claims CI/CD, run by Azure DevOps (project TeduhClaims) on every push and pull request.
 #
-#   Test    every change: build with Java 25 and run all tests against real PostgreSQL and Azurite in Docker
-#   Image   main only: build the Docker image and push it to ghcr.io/hussenoloyede/teduh-claims
+#   Test    every change, two jobs side by side:
+#             Api  build with Java 25 and run all tests against real PostgreSQL and Azurite in Docker
+#             Web  lint and build the React app, run its unit tests and every Storybook story in Chromium,
+#                  and check the Storybook builds
+#   Image   main only: build the Docker image (React app and Storybook inside) and push it to
+#           ghcr.io/hussenoloyede/teduh-claims
 #   Deploy  main only: point the container app at the new image and wait until it reports ready
 #
 # Two service connections, both created by hand in Project settings (see docs, step 4d):
@@ -26,6 +30,7 @@ variables:
   resourceGroup: teduh-rg
   containerApp: teduh-claims
   MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+  npm_config_cache: $(Pipeline.Workspace)/.npm
 
 stages:
   - stage: Test
@@ -75,6 +80,60 @@ stages:
               testResultsFiles: '**/surefire-reports/TEST-*.xml'
               testRunTitle: Teduh Claims tests
 
+      - job: Web
+        displayName: React app, unit tests and Storybook stories in Chromium
+        steps:
+          - task: UseNode@1
+            displayName: Use Node 22
+            inputs:
+              version: 22.x
+
+          # npm keeps downloaded packages in npm_config_cache; the key changes whenever the lock file does.
+          - task: Cache@2
+            displayName: Cache npm packages
+            inputs:
+              key: 'npm | "$(Agent.OS)" | web/package-lock.json'
+              restoreKeys: |
+                npm | "$(Agent.OS)"
+              path: $(npm_config_cache)
+
+          # Installs exactly what package-lock.json lists, nothing newer.
+          - bash: npm ci --no-audit --no-fund
+            workingDirectory: web
+            displayName: npm ci
+
+          # The story tests run in a real headless Chromium. --with-deps adds the Linux libraries it needs.
+          - bash: npx playwright install --with-deps chromium
+            workingDirectory: web
+            displayName: Install Chromium for the story tests
+
+          - bash: npm run lint
+            workingDirectory: web
+            displayName: Lint (oxlint)
+
+          # tsc -b checks every type, then Vite builds the app.
+          - bash: npm run build
+            workingDirectory: web
+            displayName: Type check and build
+
+          # Both Vitest projects: unit (format.ts in Node) and storybook (every story, with axe).
+          # The JUnit file lets Azure DevOps show each test in the run's Tests tab.
+          - bash: npx vitest run --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
+            workingDirectory: web
+            displayName: Unit tests and story tests
+
+          - task: PublishTestResults@2
+            displayName: Publish web test results
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: JUnit
+              testResultsFiles: web/test-results/junit.xml
+              testRunTitle: Teduh Claims web tests
+
+          - bash: npm run build-storybook -- --quiet
+            workingDirectory: web
+            displayName: Build the Storybook
+
   - stage: Image
     displayName: Build and push the image
     dependsOn: Test
@@ -84,7 +143,8 @@ stages:
         displayName: ghcr.io/$(imageRepository)
         steps:
           # The registry address comes from the ghcr-teduh connection, so the image is pushed as
-          # ghcr.io/hussenoloyede/teduh-claims:<build id> and :latest.
+          # ghcr.io/hussenoloyede/teduh-claims:<build id> and :latest. The Dockerfile builds the React app and
+          # the Storybook itself, so the image is the same whether it is built here or on a laptop.
           - task: Docker@2
             displayName: Build and push
             inputs:

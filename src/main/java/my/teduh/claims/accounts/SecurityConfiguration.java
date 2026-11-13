@@ -61,6 +61,11 @@ class SecurityConfiguration {
 				.failureHandler((request, response, exception) -> problem(response, 401, "Sign-in failed",
 						"That email and password don't match.")))
 
+			// Spring Security forbids every page from being shown in a frame (X-Frame-Options: DENY), which stops
+			// other sites hiding Teduh inside theirs to trick clicks. The Storybook shows each story in a frame
+			// on its own page, so frames from Teduh itself are allowed. Other sites are still refused.
+			.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+
 			.logout(logout -> logout.logoutUrl("/api/auth/logout")
 				.deleteCookies("JSESSIONID")
 				.logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.NO_CONTENT)))
