@@ -1,0 +1,107 @@
+/* Customer buttons in Hi-Fi 2.0: 48 px, 12 px corners, semibold.
+   Agent buttons: 4 px corners, and the small ones are regular weight. */
+.button {
+  --button-radius: var(--radius-lg);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--button-radius);
+  font-family: var(--font-body);
+  font-size: var(--text-size-md);
+  font-weight: var(--font-weight-semibold);
+  line-height: 20px;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+:global([data-theme='agent']) .button {
+  --button-radius: var(--radius-xs);
+}
+
+.md {
+  min-height: 48px;
+  padding: 0 var(--space-5);
+}
+
+.sm {
+  min-height: 32px;
+  padding: 0 var(--space-4);
+}
+
+:global([data-theme='agent']) .sm {
+  font-weight: var(--font-weight-regular);
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.primary {
+  color: var(--color-text-on-brand);
+  background: var(--color-brand);
+  box-shadow: var(--shadow-raised);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--color-brand-hover);
+}
+
+.secondary {
+  color: var(--color-text-brand);
+  background: var(--color-bg-subtle);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--color-brand-subtle);
+}
+
+/* The agent's secondary is the pale blue pill with dark text. */
+:global([data-theme='agent']) .secondary {
+  color: var(--color-text);
+  background: var(--color-brand-subtle);
+}
+
+:global([data-theme='agent']) .secondary:hover:not(:disabled) {
+  background: var(--color-bg-subtle);
+}
+
+/* Red text on white with a red outline, so it reads as a button on a white card. */
+.danger {
+  color: var(--color-danger);
+  background: var(--color-bg);
+  border-color: var(--color-danger);
+}
+
+.danger:hover:not(:disabled) {
+  background: var(--status-rejected-bg);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  box-shadow: none;
+}
+
+.button[aria-busy='true'] {
+  cursor: progress;
+  opacity: 0.8;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: var(--radius-full);
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

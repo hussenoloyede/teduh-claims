@@ -1,0 +1,135 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  height: 64px;
+  padding: 0 var(--space-8);
+  background: var(--color-bg);
+  box-shadow: 0 1px 8px rgb(0 0 0 / 0.04);
+}
+
+.left,
+.right,
+.user {
+  display: flex;
+  align-items: center;
+}
+
+.left {
+  gap: var(--space-6);
+}
+
+.right {
+  gap: var(--space-4);
+}
+
+.user {
+  gap: var(--space-2);
+}
+
+.brand {
+  font-size: var(--text-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: 24px;
+  letter-spacing: -0.025em;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.nav {
+  display: flex;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link {
+  display: block;
+  padding: var(--space-1) var(--space-4);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  border-radius: var(--radius-xs);
+}
+
+.link:hover {
+  background: var(--color-bg-subtle);
+}
+
+/* The current page: pale blue, darker and bolder text. */
+.link[aria-current='page'] {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  background: var(--color-brand-subtle);
+}
+
+.bell {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-xs);
+}
+
+.bell:hover {
+  background: var(--color-bg-subtle);
+}
+
+.count {
+  position: absolute;
+  top: 1px;
+  right: 0;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  line-height: 16px;
+  text-align: center;
+  color: var(--color-text-on-brand);
+  background: var(--color-danger);
+  border-radius: var(--radius-full);
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  background: var(--color-border);
+}
+
+.who {
+  display: flex;
+  flex-direction: column;
+}
+
+.name {
+  font-size: var(--text-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 16px;
+}
+
+.role {
+  font-size: var(--text-size-xs);
+  line-height: 16px;
+  color: var(--color-text-muted);
+}
+
+.signOut {
+  padding: var(--space-2);
+  font-size: var(--text-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 18px;
+  color: var(--color-text-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+}
+
+.signOut:hover {
+  color: var(--color-text);
+  background: var(--color-bg-subtle);
+}

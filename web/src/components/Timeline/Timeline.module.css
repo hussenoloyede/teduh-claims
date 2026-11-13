@@ -1,0 +1,76 @@
+/* The claim timeline on C07 in Hi-Fi 2.0. */
+.timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  column-gap: var(--space-2);
+  padding-bottom: var(--space-6);
+}
+
+.item:last-child {
+  padding-bottom: 0;
+}
+
+/* The line joining one marker to the next. */
+.item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  bottom: 0;
+  left: 11px;
+  width: 2px;
+  background: var(--color-border);
+}
+
+.marker {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: var(--color-text-on-brand);
+  background: var(--color-brand);
+  border-radius: var(--radius-full);
+}
+
+.item[data-upcoming] .marker {
+  background: var(--color-bg-subtle);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-text-subtle);
+  border-radius: var(--radius-full);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  padding-top: 2px;
+}
+
+.title {
+  font-weight: var(--font-weight-semibold);
+}
+
+.item[data-upcoming] .title {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+.time,
+.detail {
+  font-size: var(--text-size-sm);
+  line-height: 18px;
+  color: var(--color-text-muted);
+}
+
+.detail {
+  margin-top: var(--space-1);
+}

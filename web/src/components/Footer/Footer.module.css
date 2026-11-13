@@ -1,0 +1,9 @@
+.footer {
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-size-xs);
+  line-height: 16px;
+  text-align: center;
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+  box-shadow: 0 -1px 8px rgb(0 0 0 / 0.04);
+}

@@ -1,0 +1,48 @@
+.nav {
+  padding: 0 var(--space-1) env(safe-area-inset-bottom);
+  background: color-mix(in srgb, var(--color-bg-page) 90%, transparent);
+  backdrop-filter: blur(24px);
+  box-shadow: 0 -2px 12px rgb(11 79 66 / 0.05);
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 64px;
+  font-size: var(--text-size-2xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 14px;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 28px;
+  border-radius: var(--radius-full);
+}
+
+/* In the design only the colour changes, and the two greys-greens are too
+   close to tell apart. The pale pill and bold label make the current tab clear. */
+.link[aria-current='page'] {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-brand);
+}
+
+.link[aria-current='page'] .icon {
+  background: var(--color-brand-subtle);
+}

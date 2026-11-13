@@ -1,0 +1,16 @@
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  color: var(--color-text-brand);
+  background: var(--color-brand-subtle);
+}
+
+:global([data-theme='agent']) .avatar {
+  border-radius: var(--radius-lg);
+}

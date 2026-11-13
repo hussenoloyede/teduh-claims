@@ -20,10 +20,19 @@ export default defineConfig({
     },
   },
 
-  // Every story is also a test: it renders in a headless Chromium,
-  // runs its play function, and runs the accessibility checks.
   test: {
     projects: [
+      // Plain functions (src/lib) tested in Node: fast, no browser.
+      {
+        extends: true,
+        test: {
+          name: 'unit',
+          include: ['src/**/*.test.ts'],
+          environment: 'node',
+        },
+      },
+      // Every story is also a test: it renders in a headless Chromium,
+      // runs its play function, and runs the accessibility checks.
       {
         extends: true,
         plugins: [storybookTest({ configDir: path.join(dirname, '.storybook') })],

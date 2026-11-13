@@ -16,6 +16,9 @@
   --color-brand-hover: #00372d;
   --color-brand-subtle: #b1efdd;
   --color-accent: #fc8f34;
+  /* Not in the Figma Color collection: amber/800 from Primitives. Outlines the
+     orange unread dot, which on its own is too faint against the page (2.2:1). */
+  --color-accent-strong: #944a00;
   --color-bg: #ffffff;
   --color-bg-page: #faf8ff;
   --color-bg-subtle: #f2f3ff;
@@ -61,6 +64,10 @@
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-full: 999px;
+
+  /* Shadows, copied from the effects in Hi-Fi 2.0 (Figma has no shadow variables) */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.05);
+  --shadow-raised: 0 2px 4px rgb(0 0 0 / 0.1), 0 4px 6px rgb(0 0 0 / 0.1);
 
   /* Type */
   --font-heading: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif;

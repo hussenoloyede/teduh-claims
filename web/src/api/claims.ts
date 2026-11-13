@@ -1,6 +1,6 @@
-// Claim statuses, in the same order as ClaimStatus.java in the backend.
-// The API sends the enum name (SUBMITTED); the screens show the label.
-// If a status is added or renamed in Java, change it here too.
+// Claim statuses and types, named exactly as in the backend's ClaimStatus.java
+// and ClaimType.java. The API sends the enum name (SUBMITTED); the screens
+// show the label. If one changes in Java, change it here too.
 
 export const claimStatuses = [
   'SUBMITTED',
@@ -18,4 +18,17 @@ export const statusLabel: Record<ClaimStatus, string> = {
   MORE_INFO_NEEDED: 'More info needed',
   APPROVED: 'Approved',
   REJECTED: 'Rejected',
+};
+
+export type ClaimType =
+  | 'FLIGHT_DELAY'
+  | 'BAGGAGE_DELAYED'
+  | 'LOST_OR_DAMAGED_BAGGAGE'
+  | 'TRIP_CANCELLATION';
+
+export const claimTypeLabel: Record<ClaimType, string> = {
+  FLIGHT_DELAY: 'Flight delay',
+  BAGGAGE_DELAYED: 'Baggage delayed',
+  LOST_OR_DAMAGED_BAGGAGE: 'Lost or damaged baggage',
+  TRIP_CANCELLATION: 'Trip cancellation',
 };

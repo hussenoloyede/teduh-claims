@@ -1,0 +1,75 @@
+/* The document cards on C07 in Hi-Fi 2.0. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+:global([data-theme='agent']) .row {
+  border-radius: var(--radius-md);
+}
+
+.icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  color: var(--color-text-brand);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-md);
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Long names end in "…" instead of pushing the button off the row. */
+.name {
+  overflow: hidden;
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  font-size: var(--text-size-2xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 14px;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
+}
+
+.action {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  font-size: var(--text-size-xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  color: var(--color-text-brand);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.action:hover:not(:disabled) {
+  background: var(--color-bg-subtle);
+}
+
+.action:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
