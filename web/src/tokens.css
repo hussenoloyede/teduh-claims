@@ -1,0 +1,102 @@
+/*
+ * Teduh design tokens.
+ *
+ * Copied by hand from the Figma variables in the Teduh design file
+ * (collections Color, Spacing and radius, Typography). Each name matches the
+ * Figma variable's code syntax, so `color/brand` in Figma is `var(--color-brand)` here.
+ * When a variable changes in Figma, change it here too.
+ *
+ * Colours have two themes. The customer app uses :root. The agent app adds
+ * data-theme="agent" to its root element and gets the blue palette instead.
+ */
+
+:root {
+  /* Colour, customer theme */
+  --color-brand: #0b4f42;
+  --color-brand-hover: #00372d;
+  --color-brand-subtle: #b1efdd;
+  --color-accent: #fc8f34;
+  --color-bg: #ffffff;
+  --color-bg-page: #faf8ff;
+  --color-bg-subtle: #f2f3ff;
+  --color-text: #131b2e;
+  --color-text-muted: #404945;
+  --color-text-subtle: #69716e;
+  --color-text-brand: #0b4f42;
+  --color-text-on-brand: #ffffff;
+  --color-border: #eaedff;
+  --color-border-field: #69716e;
+  --color-focus: #0b4f42;
+  --color-danger: #ba1a1a;
+  --color-success: #005120;
+
+  /* Claim statuses: text on its own background */
+  --status-submitted-text: #131b2e;
+  --status-submitted-bg: #e2e7ff;
+  --status-under-review-text: #0b4f42;
+  --status-under-review-bg: #b1efdd;
+  --status-more-info-needed-text: #944a00;
+  --status-more-info-needed-bg: #ffdcc5;
+  --status-approved-text: #005120;
+  --status-approved-bg: #7ffc97;
+  --status-rejected-text: #93000a;
+  --status-rejected-bg: #ffdad6;
+
+  /* Spacing, on a 4 px base */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Corners */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 999px;
+
+  /* Type */
+  --font-heading: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  --text-size-2xs: 11px;
+  --text-size-xs: 12px;
+  --text-size-sm: 13px;
+  --text-size-md: 14px;
+  --text-size-lg: 16px;
+  --text-size-xl: 18px;
+  --text-size-2xl: 22px;
+  --text-size-3xl: 24px;
+  --text-size-4xl: 28px;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}
+
+[data-theme='agent'] {
+  --color-brand: #0051d5;
+  --color-brand-hover: #316bf3;
+  --color-brand-subtle: #dce9ff;
+  --color-bg-page: #f8f9ff;
+  --color-bg-subtle: #eff4ff;
+  --color-text: #0b1c30;
+  --color-text-muted: #45464d;
+  --color-text-subtle: #6e6f75;
+  --color-text-brand: #0051d5;
+  --color-border: #dce9ff;
+  --color-border-field: #6e6f75;
+  --color-focus: #0051d5;
+  --color-success: #067a57;
+
+  --status-submitted-text: #92400e;
+  --status-submitted-bg: #fef3c7;
+  --status-under-review-text: #0051d5;
+  --status-under-review-bg: #dce9ff;
+}

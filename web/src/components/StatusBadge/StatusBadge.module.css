@@ -1,0 +1,51 @@
+/* Matches the status pills in Hi-Fi 2.0: 11 px bold capitals in a full pill. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 9px;
+  /* Invisible normally. In Windows high contrast mode the background is
+     removed, and this border keeps the pill's outline. */
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-size-2xs);
+  font-weight: var(--font-weight-bold);
+  line-height: 14px;
+  letter-spacing: 0.05em;
+  /* The text stays "Under review" in the page, so screen readers say the
+     words normally; only the drawing is in capitals. */
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--badge-text);
+  background: var(--badge-bg);
+}
+
+.badge[data-status='SUBMITTED'] {
+  --badge-text: var(--status-submitted-text);
+  --badge-bg: var(--status-submitted-bg);
+}
+
+.badge[data-status='UNDER_REVIEW'] {
+  --badge-text: var(--status-under-review-text);
+  --badge-bg: var(--status-under-review-bg);
+}
+
+.badge[data-status='MORE_INFO_NEEDED'] {
+  --badge-text: var(--status-more-info-needed-text);
+  --badge-bg: var(--status-more-info-needed-bg);
+}
+
+.badge[data-status='APPROVED'] {
+  --badge-text: var(--status-approved-text);
+  --badge-bg: var(--status-approved-bg);
+}
+
+.badge[data-status='REJECTED'] {
+  --badge-text: var(--status-rejected-text);
+  --badge-bg: var(--status-rejected-bg);
+}
+
+/* The agent screens use a lighter weight for the same pill. */
+:global([data-theme='agent']) .badge {
+  font-weight: var(--font-weight-semibold);
+}
