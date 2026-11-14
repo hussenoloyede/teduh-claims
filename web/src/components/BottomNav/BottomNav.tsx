@@ -1,4 +1,5 @@
 import { House, ReceiptText, Shield, UserRound } from 'lucide-react';
+import { Link } from 'react-router';
 import styles from './BottomNav.module.css';
 
 const items = [
@@ -22,12 +23,12 @@ export function BottomNav({ current }: BottomNavProps) {
       <ul className={styles.list}>
         {items.map(({ key, label, href, Icon }) => (
           <li key={key}>
-            <a className={styles.link} href={href} aria-current={key === current ? 'page' : undefined}>
+            <Link className={styles.link} to={href} aria-current={key === current ? 'page' : undefined}>
               <span className={styles.icon}>
                 <Icon size={20} aria-hidden="true" />
               </span>
               {label}
-            </a>
+            </Link>
           </li>
         ))}
       </ul>

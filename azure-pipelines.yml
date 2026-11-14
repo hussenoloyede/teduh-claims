@@ -102,6 +102,12 @@ stages:
             workingDirectory: web
             displayName: npm ci
 
+          # src/api/schema.d.ts must be exactly what openapi.json generates. ApiDocsTest keeps openapi.json in
+          # step with the Java code, so together they catch an API change the React app hasn't caught up with.
+          - bash: npm run api:types && git diff --exit-code -- src/api/schema.d.ts
+            workingDirectory: web
+            displayName: Check the API types match openapi.json
+
           # The story tests run in a real headless Chromium. --with-deps adds the Linux libraries it needs.
           - bash: npx playwright install --with-deps chromium
             workingDirectory: web

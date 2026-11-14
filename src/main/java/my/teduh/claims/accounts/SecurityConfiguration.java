@@ -35,7 +35,8 @@ class SecurityConfiguration {
 			.requestMatchers("/actuator/health/**").permitAll()
 			.requestMatchers("/actuator/**").denyAll()
 			.requestMatchers("/api/**").authenticated()
-			// Everything else is the React app's files (from week 6), which anyone may load.
+			// Everything else is the React app, the Storybook and the API document (/v3/api-docs), which anyone
+			// may load. The pages themselves ask /api/auth/me who is signed in.
 			.anyRequest().permitAll())
 
 			// CSRF: because the browser sends the session cookie automatically, another website could make a

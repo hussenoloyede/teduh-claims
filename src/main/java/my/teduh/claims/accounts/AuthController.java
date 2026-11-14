@@ -2,6 +2,8 @@ package my.teduh.claims.accounts;
 
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.Parameter;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.web.csrf.CsrfToken;
@@ -31,7 +33,8 @@ class AuthController {
 	 */
 	@GetMapping("/csrf")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void csrf(CsrfToken token) {
+	// The token comes from Spring Security, not from the caller, so the API document leaves it out.
+	public void csrf(@Parameter(hidden = true) CsrfToken token) {
 		token.getToken();
 	}
 

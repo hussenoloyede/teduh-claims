@@ -1,4 +1,5 @@
 import { Luggage } from 'lucide-react';
+import { Link } from 'react-router';
 import { claimTypeLabel, type ClaimStatus, type ClaimType } from '../../api/claims';
 import { formatDate, formatMoney } from '../../lib/format';
 import { StatusBadge } from '../StatusBadge/StatusBadge';
@@ -27,7 +28,7 @@ export function ClaimCard({
   href,
 }: ClaimCardProps) {
   return (
-    <a className={styles.card} href={href}>
+    <Link className={styles.card} to={href}>
       <div className={styles.head}>
         <span className={styles.icon} aria-hidden="true">
           <Luggage size={16} />
@@ -50,6 +51,6 @@ export function ClaimCard({
           <dd className={styles.money}>{formatMoney(amountClaimed)}</dd>
         </div>
       </dl>
-    </a>
+    </Link>
   );
 }

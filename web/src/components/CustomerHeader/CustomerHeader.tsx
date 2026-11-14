@@ -1,4 +1,5 @@
 import { Bell, ChevronLeft } from 'lucide-react';
+import { Link } from 'react-router';
 import { Avatar } from '../Avatar/Avatar';
 import styles from './CustomerHeader.module.css';
 
@@ -17,27 +18,27 @@ export function CustomerHeader({ backHref, unreadCount, userName }: CustomerHead
   return (
     <header className={styles.header}>
       {backHref ? (
-        <a className={styles.back} href={backHref}>
+        <Link className={styles.back} to={backHref}>
           <ChevronLeft size={22} aria-hidden="true" />
           Back
-        </a>
+        </Link>
       ) : (
-        <a className={styles.brand} href="/">
+        <Link className={styles.brand} to="/">
           Teduh
-        </a>
+        </Link>
       )}
       <div className={styles.actions}>
-        <a className={styles.iconLink} href="/notifications" aria-label={bellLabel}>
+        <Link className={styles.iconLink} to="/notifications" aria-label={bellLabel}>
           <Bell size={20} aria-hidden="true" />
           {unreadCount > 0 && <span className={styles.dot} />}
-        </a>
+        </Link>
         {userName && (
           // A hidden word instead of aria-label: the initials are a stand-in for a
           // photo, not a label, and axe asks that visible text never fights the name.
-          <a className={styles.iconLink} href="/profile">
+          <Link className={styles.iconLink} to="/profile">
             <span className="visually-hidden">Profile</span>
             <Avatar name={userName} />
-          </a>
+          </Link>
         )}
       </div>
     </header>

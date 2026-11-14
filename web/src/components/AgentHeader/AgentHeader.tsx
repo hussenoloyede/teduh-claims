@@ -1,4 +1,5 @@
 import { Bell } from 'lucide-react';
+import { Link } from 'react-router';
 import { Avatar } from '../Avatar/Avatar';
 import styles from './AgentHeader.module.css';
 
@@ -24,35 +25,35 @@ export function AgentHeader({ nav, unreadCount, userName, userRole, onSignOut }:
   return (
     <header className={styles.header}>
       <div className={styles.left}>
-        <a className={styles.brand} href="/agent">
+        <Link className={styles.brand} to="/agent">
           Teduh
-        </a>
+        </Link>
         <nav aria-label="Main">
           <ul className={styles.nav}>
             {nav.map((item) => (
               <li key={item.href}>
-                <a
+                <Link
                   className={styles.link}
-                  href={item.href}
+                  to={item.href}
                   // Tells screen readers which page this is; the CSS styles it too.
                   aria-current={item.current ? 'page' : undefined}
                 >
                   {item.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
         </nav>
       </div>
       <div className={styles.right}>
-        <a className={styles.bell} href="/agent/notifications" aria-label={bellLabel}>
+        <Link className={styles.bell} to="/agent/notifications" aria-label={bellLabel}>
           <Bell size={18} aria-hidden="true" />
           {unreadCount > 0 && (
             <span className={styles.count} aria-hidden="true">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}
-        </a>
+        </Link>
         <span className={styles.divider} aria-hidden="true" />
         <div className={styles.user}>
           <Avatar name={userName} />

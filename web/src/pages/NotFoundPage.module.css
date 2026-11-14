@@ -1,0 +1,24 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--color-bg-page);
+}
+
+.main {
+  flex: 1;
+  padding: var(--space-6) var(--space-4);
+}
+
+.main h1 {
+  margin: 0 0 var(--space-3);
+}
+
+.main p {
+  margin: 0 0 var(--space-4);
+}
+
+.main a {
+  color: var(--color-text-brand);
+  font-weight: 600;
+}

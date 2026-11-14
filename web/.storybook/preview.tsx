@@ -1,4 +1,5 @@
 import type { Preview } from '@storybook/react-vite';
+import { MemoryRouter } from 'react-router';
 import '../src/index.css';
 
 const preview: Preview = {
@@ -19,15 +20,19 @@ const preview: Preview = {
   },
   initialGlobals: { theme: 'customer' },
 
-  // Wraps every story. data-theme="agent" switches the tokens to blue.
+  // Wraps every story. data-theme="agent" switches the tokens to blue. The links in the components are
+  // React Router links, which only work inside a router; MemoryRouter keeps its address in memory, so
+  // clicking a link in a story never leaves the Storybook.
   decorators: [
     (Story, { globals }) => (
-      <div
-        data-theme={globals.theme === 'agent' ? 'agent' : undefined}
-        style={{ padding: 'var(--space-4)', background: 'var(--color-bg-page)' }}
-      >
-        <Story />
-      </div>
+      <MemoryRouter>
+        <div
+          data-theme={globals.theme === 'agent' ? 'agent' : undefined}
+          style={{ padding: 'var(--space-4)', background: 'var(--color-bg-page)' }}
+        >
+          <Story />
+        </div>
+      </MemoryRouter>
     ),
   ],
 

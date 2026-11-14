@@ -8,6 +8,8 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +65,8 @@ class ClaimController {
 	 */
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@PreAuthorize("hasRole('CUSTOMER')")
+	// springdoc can't see the 201 inside ResponseEntity.created(...), so the API document is told here.
+	@ApiResponse(responseCode = "201", description = "The new claim, with its reference")
 	public ResponseEntity<ClaimDetails> submit(@AuthenticationPrincipal SignedInUser me,
 			@Valid @RequestPart("claim") SubmitClaimRequest body,
 			@RequestPart(name = "files", required = false) List<MultipartFile> files) {

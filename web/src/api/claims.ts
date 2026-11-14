@@ -1,16 +1,12 @@
-// Claim statuses and types, named exactly as in the backend's ClaimStatus.java
-// and ClaimType.java. The API sends the enum name (SUBMITTED); the screens
-// show the label. If one changes in Java, change it here too.
+// Claim statuses and types come from the generated API types (schema.d.ts), so they always match
+// ClaimStatus.java and ClaimType.java. The API sends the enum name (SUBMITTED); the screens show the label.
+// If Java gains a status, TypeScript stops the build until it has a label here.
 
-export const claimStatuses = [
-  'SUBMITTED',
-  'UNDER_REVIEW',
-  'MORE_INFO_NEEDED',
-  'APPROVED',
-  'REJECTED',
-] as const;
+import type { components } from './schema';
 
-export type ClaimStatus = (typeof claimStatuses)[number];
+export type ClaimSummary = components['schemas']['ClaimSummary'];
+export type ClaimStatus = ClaimSummary['status'];
+export type ClaimType = ClaimSummary['claimType'];
 
 export const statusLabel: Record<ClaimStatus, string> = {
   SUBMITTED: 'Submitted',
@@ -20,11 +16,8 @@ export const statusLabel: Record<ClaimStatus, string> = {
   REJECTED: 'Rejected',
 };
 
-export type ClaimType =
-  | 'FLIGHT_DELAY'
-  | 'BAGGAGE_DELAYED'
-  | 'LOST_OR_DAMAGED_BAGGAGE'
-  | 'TRIP_CANCELLATION';
+/** Every status, in the order a claim moves through them. Taken from the labels, so none can be missed. */
+export const claimStatuses = Object.keys(statusLabel) as ClaimStatus[];
 
 export const claimTypeLabel: Record<ClaimType, string> = {
   FLIGHT_DELAY: 'Flight delay',

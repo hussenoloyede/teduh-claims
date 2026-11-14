@@ -1,5 +1,4 @@
-// Placeholder page. The claim screens are built as components in Storybook
-// first and are put together here in week 6.
+// Placeholder page at /. The signed-in screens replace it in the next steps of week 6.
 function App() {
   return (
     <main style={{ padding: 'var(--space-6)' }}>

@@ -15,6 +15,11 @@ spring:
       # Flyway owns the schema. Hibernate only checks that the entities match the tables,
       # and refuses to start if they don't. It never changes a table itself.
       ddl-auto: validate
+  web:
+    resources:
+      # Spring Boot's own handler for static files is off: WebPages registers one that also answers the
+      # React app's addresses (/claims/...) with index.html. Two handlers for the same paths would race.
+      add-mappings: false
   mvc:
     # Spring's own errors (bad JSON, a missing field) come back in the same RFC 9457 shape as ours.
     problemdetails:
@@ -46,6 +51,18 @@ server:
         http-only: true
         secure: true
         same-site: lax
+
+springdoc:
+  api-docs:
+    # OpenAPI 3.0 rather than 3.1: its "nullable: true" is what @Schema(nullable = true) writes and what
+    # openapi-typescript turns into "| null" in the React app's types.
+    version: openapi_3_0
+  # Answers are described as application/json (springdoc's default is */*, which says nothing).
+  default-produces-media-type: application/json
+  # Keys sorted and indented, so the saved copy in web/openapi.json only changes when the API does,
+  # and a change is easy to read in a diff.
+  writer-with-order-by-keys: true
+  writer-with-default-pretty-printer: true
 
 teduh:
   storage:

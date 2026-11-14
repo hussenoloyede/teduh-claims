@@ -1,0 +1,806 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "description" : "Claims for Teduh, a fictional travel insurer made for a portfolio project.",
+    "title" : "Teduh Claims API",
+    "version" : "1"
+  },
+  "servers" : [ {
+    "url" : "/"
+  } ],
+  "paths" : {
+    "/api/auth/csrf" : {
+      "get" : {
+        "operationId" : "csrf",
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "tags" : [ "auth-controller" ]
+      }
+    },
+    "/api/auth/me" : {
+      "get" : {
+        "operationId" : "me",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Me"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "auth-controller" ]
+      }
+    },
+    "/api/claims" : {
+      "get" : {
+        "operationId" : "list",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "tab",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ClaimSummary"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "claim-controller" ]
+      },
+      "post" : {
+        "operationId" : "submit",
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "claim" : {
+                    "$ref" : "#/components/schemas/SubmitClaimRequest"
+                  },
+                  "files" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string",
+                      "format" : "binary"
+                    }
+                  }
+                },
+                "required" : [ "claim" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ClaimDetails"
+                }
+              }
+            },
+            "description" : "The new claim, with its reference"
+          }
+        },
+        "tags" : [ "claim-controller" ]
+      }
+    },
+    "/api/claims/{id}" : {
+      "get" : {
+        "operationId" : "get",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ClaimDetails"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "claim-controller" ]
+      }
+    },
+    "/api/claims/{id}/approve" : {
+      "post" : {
+        "operationId" : "approve",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ApproveRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ClaimDetails"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "claim-controller" ]
+      }
+    },
+    "/api/claims/{id}/documents/{documentId}/link" : {
+      "get" : {
+        "operationId" : "documentLink",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "path",
+          "name" : "documentId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DownloadLink"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "claim-controller" ]
+      }
+    },
+    "/api/claims/{id}/reject" : {
+      "post" : {
+        "operationId" : "reject",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RejectRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ClaimDetails"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "claim-controller" ]
+      }
+    },
+    "/api/claims/{id}/request-info" : {
+      "post" : {
+        "operationId" : "requestInfo",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RequestInfoRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ClaimDetails"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "claim-controller" ]
+      }
+    },
+    "/api/claims/{id}/respond" : {
+      "post" : {
+        "operationId" : "respond",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "files" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string",
+                      "format" : "binary"
+                    }
+                  },
+                  "response" : {
+                    "$ref" : "#/components/schemas/RespondRequest"
+                  }
+                },
+                "required" : [ "response" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ClaimDetails"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "claim-controller" ]
+      }
+    },
+    "/api/claims/{id}/start-review" : {
+      "post" : {
+        "operationId" : "startReview",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/StartReviewRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ClaimDetails"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "claim-controller" ]
+      }
+    },
+    "/api/notifications" : {
+      "get" : {
+        "operationId" : "inbox",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Inbox"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "notification-controller" ]
+      }
+    },
+    "/api/notifications/read-all" : {
+      "post" : {
+        "operationId" : "markAllRead",
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "tags" : [ "notification-controller" ]
+      }
+    },
+    "/api/notifications/{id}/read" : {
+      "post" : {
+        "operationId" : "markRead",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "tags" : [ "notification-controller" ]
+      }
+    },
+    "/api/policies" : {
+      "get" : {
+        "operationId" : "mine",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/PolicyCover"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "policy-controller" ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "ApproveRequest" : {
+        "type" : "object",
+        "properties" : {
+          "amount" : {
+            "type" : "number"
+          },
+          "reason" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "amount", "version" ]
+      },
+      "ClaimDetails" : {
+        "type" : "object",
+        "properties" : {
+          "amountClaimed" : {
+            "type" : "number"
+          },
+          "approvedAmount" : {
+            "type" : "number",
+            "nullable" : true
+          },
+          "assignedAgentId" : {
+            "type" : "string",
+            "format" : "uuid",
+            "nullable" : true
+          },
+          "claimType" : {
+            "type" : "string",
+            "enum" : [ "FLIGHT_DELAY", "BAGGAGE_DELAYED", "LOST_OR_DAMAGED_BAGGAGE", "TRIP_CANCELLATION" ]
+          },
+          "decisionReason" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "documents" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StoredDocument"
+            }
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "incidentDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "policyId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "reference" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "SUBMITTED", "UNDER_REVIEW", "MORE_INFO_NEEDED", "APPROVED", "REJECTED" ]
+          },
+          "submittedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "timeline" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TimelineEntry"
+            }
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "amountClaimed", "claimType", "description", "documents", "id", "incidentDate", "policyId", "reference", "status", "submittedAt", "timeline", "version" ]
+      },
+      "ClaimSummary" : {
+        "type" : "object",
+        "properties" : {
+          "amountClaimed" : {
+            "type" : "number"
+          },
+          "assignedAgentId" : {
+            "type" : "string",
+            "format" : "uuid",
+            "nullable" : true
+          },
+          "claimType" : {
+            "type" : "string",
+            "enum" : [ "FLIGHT_DELAY", "BAGGAGE_DELAYED", "LOST_OR_DAMAGED_BAGGAGE", "TRIP_CANCELLATION" ]
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "reference" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "SUBMITTED", "UNDER_REVIEW", "MORE_INFO_NEEDED", "APPROVED", "REJECTED" ]
+          },
+          "submittedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "amountClaimed", "claimType", "id", "reference", "status", "submittedAt", "version" ]
+      },
+      "DownloadLink" : {
+        "type" : "object",
+        "properties" : {
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "url" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "expiresAt", "url" ]
+      },
+      "Inbox" : {
+        "type" : "object",
+        "properties" : {
+          "notifications" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Item"
+            }
+          },
+          "unreadCount" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "notifications", "unreadCount" ]
+      },
+      "Item" : {
+        "type" : "object",
+        "properties" : {
+          "claimId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "read" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "claimId", "createdAt", "id", "message", "read" ]
+      },
+      "Me" : {
+        "type" : "object",
+        "properties" : {
+          "displayName" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "role" : {
+            "type" : "string",
+            "enum" : [ "CUSTOMER", "AGENT" ]
+          }
+        },
+        "required" : [ "displayName", "email", "id", "role" ]
+      },
+      "PolicyCover" : {
+        "type" : "object",
+        "properties" : {
+          "coverEnd" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "coverStart" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "customerId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "limits" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "number"
+            }
+          },
+          "planName" : {
+            "type" : "string"
+          },
+          "policyId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "policyNumber" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "coverEnd", "coverStart", "customerId", "limits", "planName", "policyId", "policyNumber" ]
+      },
+      "RejectRequest" : {
+        "type" : "object",
+        "properties" : {
+          "reason" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "version" ]
+      },
+      "RequestInfoRequest" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "version" ]
+      },
+      "RespondRequest" : {
+        "type" : "object",
+        "properties" : {
+          "note" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "version" ]
+      },
+      "StartReviewRequest" : {
+        "type" : "object",
+        "properties" : {
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "version" ]
+      },
+      "StoredDocument" : {
+        "type" : "object",
+        "properties" : {
+          "contentType" : {
+            "type" : "string"
+          },
+          "fileName" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "sha256" : {
+            "type" : "string"
+          },
+          "sizeBytes" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "uploadedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "uploadedBy" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        },
+        "required" : [ "contentType", "fileName", "id", "sha256", "sizeBytes", "uploadedAt", "uploadedBy" ]
+      },
+      "SubmitClaimRequest" : {
+        "type" : "object",
+        "properties" : {
+          "amountClaimed" : {
+            "type" : "number"
+          },
+          "claimType" : {
+            "type" : "string",
+            "enum" : [ "FLIGHT_DELAY", "BAGGAGE_DELAYED", "LOST_OR_DAMAGED_BAGGAGE", "TRIP_CANCELLATION" ]
+          },
+          "description" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "incidentDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "policyId" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        },
+        "required" : [ "amountClaimed", "claimType", "incidentDate", "policyId" ]
+      },
+      "TimelineEntry" : {
+        "type" : "object",
+        "properties" : {
+          "actorId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "fromStatus" : {
+            "type" : "string",
+            "nullable" : true,
+            "enum" : [ "SUBMITTED", "UNDER_REVIEW", "MORE_INFO_NEEDED", "APPROVED", "REJECTED" ]
+          },
+          "message" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "occurredAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "toStatus" : {
+            "type" : "string",
+            "enum" : [ "SUBMITTED", "UNDER_REVIEW", "MORE_INFO_NEEDED", "APPROVED", "REJECTED" ]
+          }
+        },
+        "required" : [ "actorId", "occurredAt", "toStatus" ]
+      }
+    }
+  }
+}
