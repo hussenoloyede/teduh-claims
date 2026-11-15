@@ -7,6 +7,7 @@ import styles from './NotFoundPage.module.css';
 export function NotFoundPage() {
   return (
     <div className={styles.page}>
+      <title>Page not found · Teduh Claims</title>
       <main className={styles.main}>
         <h1>Page not found</h1>
         <p>There's nothing at this address. The link may be mistyped or out of date.</p>

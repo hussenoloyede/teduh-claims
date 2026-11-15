@@ -1,0 +1,87 @@
+.field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.label {
+  font-size: var(--text-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: 16px;
+  color: var(--color-text);
+}
+
+/* Hi-Fi 2.0 draws the field as a tinted box with no outline. The 1 px border is added so the field's edge
+   reaches the 3:1 contrast WCAG asks of controls; the tint alone is too faint against white. */
+.box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-field);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-subtle);
+}
+
+:global([data-theme='agent']) .box {
+  border-radius: var(--radius-xs);
+  background: var(--color-bg);
+}
+
+/* The whole box shows the focus ring, since the input inside it has none of its own. */
+.box:focus-within {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.invalid {
+  border-color: var(--color-danger);
+}
+
+.icon {
+  display: flex;
+  color: var(--color-text-muted);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  font-size: var(--text-size-md);
+  color: var(--color-text);
+  background: transparent;
+}
+
+.input:focus-visible {
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.input:disabled {
+  cursor: not-allowed;
+  color: var(--color-text-subtle);
+}
+
+.trailing {
+  display: flex;
+  margin-right: calc(var(--space-2) * -1);
+}
+
+.hint {
+  font-size: var(--text-size-xs);
+  line-height: 16px;
+  color: var(--color-text-muted);
+}
+
+.error {
+  font-size: var(--text-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 16px;
+  color: var(--color-danger);
+}

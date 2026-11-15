@@ -1,0 +1,18 @@
+/* Header at the top, the page filling the space, the footer under it. Customers also get the bottom tabs,
+   which stay on screen while the page scrolls. */
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--color-bg-page);
+}
+
+.main {
+  flex: 1;
+}
+
+.bottomNav {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}

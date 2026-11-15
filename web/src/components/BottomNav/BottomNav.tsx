@@ -12,8 +12,8 @@ const items = [
 export type CustomerSection = (typeof items)[number]['key'];
 
 type BottomNavProps = {
-  /** Which section the customer is in. */
-  current: CustomerSection;
+  /** Which section the customer is in. None on pages outside the four, such as notifications. */
+  current?: CustomerSection;
 };
 
 // The four tabs at the bottom of the customer screens (C02, C13 in Hi-Fi 2.0).

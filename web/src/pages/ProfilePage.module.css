@@ -1,0 +1,41 @@
+.page {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 600px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+}
+
+.page h1 {
+  font-size: var(--text-size-3xl);
+  line-height: 32px;
+}
+
+.card {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-card);
+}
+
+.facts {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  margin: 0;
+}
+
+.facts dt {
+  font-size: var(--text-size-xs);
+  line-height: 16px;
+  color: var(--color-text-muted);
+}
+
+.facts dd {
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+  overflow-wrap: anywhere;
+}
