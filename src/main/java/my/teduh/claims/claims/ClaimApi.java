@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -53,46 +54,58 @@ public final class ClaimApi {
 
 	/**
 	 * One row of a list: a customer's claims or a queue tab. The policy id lets a list show the plan's name;
-	 * the approved amount lets an approved claim show what was paid rather than what was asked.
+	 * the approved amount lets an approved claim show what was paid rather than what was asked; the customer's
+	 * name is what an agent's queue shows.
 	 */
-	public record ClaimSummary(UUID id, String reference, UUID policyId, ClaimType claimType,
+	public record ClaimSummary(UUID id, String reference, UUID policyId, String customerName, ClaimType claimType,
 			BigDecimal amountClaimed, @Schema(nullable = true) BigDecimal approvedAmount, ClaimStatus status,
 			@Schema(nullable = true) UUID assignedAgentId, Instant submittedAt, long version) {
 
-		static ClaimSummary of(Claim claim) {
-			return new ClaimSummary(claim.getId(), claim.getReference(), claim.getPolicyId(), claim.getClaimType(),
-					claim.getAmountClaimed(), claim.getApprovedAmount(), claim.getStatus(), claim.getAssignedAgentId(),
-					claim.getSubmittedAt(), claim.getVersion());
+		/** names: display names by person id, from NameLookup. */
+		static ClaimSummary of(Claim claim, Map<UUID, String> names) {
+			return new ClaimSummary(claim.getId(), claim.getReference(), claim.getPolicyId(),
+					nameOf(claim.getCustomerId(), names), claim.getClaimType(), claim.getAmountClaimed(),
+					claim.getApprovedAmount(), claim.getStatus(), claim.getAssignedAgentId(), claim.getSubmittedAt(),
+					claim.getVersion());
 		}
 
 	}
 
 	/** One claim page: everything about the claim, its documents, and its timeline, oldest first. */
-	public record ClaimDetails(UUID id, String reference, UUID policyId, ClaimType claimType, LocalDate incidentDate,
-			BigDecimal amountClaimed, String description, ClaimStatus status,
-			@Schema(nullable = true) UUID assignedAgentId, @Schema(nullable = true) BigDecimal approvedAmount,
-			@Schema(nullable = true) String decisionReason, Instant submittedAt, long version,
-			List<StoredDocument> documents, List<TimelineEntry> timeline) {
+	public record ClaimDetails(UUID id, String reference, UUID policyId, String customerName, ClaimType claimType,
+			LocalDate incidentDate, BigDecimal amountClaimed, String description, ClaimStatus status,
+			@Schema(nullable = true) UUID assignedAgentId, @Schema(nullable = true) String assignedAgentName,
+			@Schema(nullable = true) BigDecimal approvedAmount, @Schema(nullable = true) String decisionReason,
+			Instant submittedAt, long version, List<StoredDocument> documents, List<TimelineEntry> timeline) {
 
-		static ClaimDetails of(Claim claim, List<StoredDocument> documents, List<ClaimEvent> events) {
-			return new ClaimDetails(claim.getId(), claim.getReference(), claim.getPolicyId(), claim.getClaimType(),
-					claim.getIncidentDate(), claim.getAmountClaimed(), claim.getDescription(), claim.getStatus(),
-					claim.getAssignedAgentId(), claim.getApprovedAmount(), claim.getDecisionReason(),
+		/** names: display names by person id, from NameLookup, covering the customer, agent and every actor. */
+		static ClaimDetails of(Claim claim, List<StoredDocument> documents, List<ClaimEvent> events,
+				Map<UUID, String> names) {
+			UUID agent = claim.getAssignedAgentId();
+			return new ClaimDetails(claim.getId(), claim.getReference(), claim.getPolicyId(),
+					nameOf(claim.getCustomerId(), names), claim.getClaimType(), claim.getIncidentDate(),
+					claim.getAmountClaimed(), claim.getDescription(), claim.getStatus(), agent,
+					(agent == null) ? null : nameOf(agent, names), claim.getApprovedAmount(), claim.getDecisionReason(),
 					claim.getSubmittedAt(), claim.getVersion(), documents,
-					events.stream().map(TimelineEntry::of).toList());
+					events.stream().map(event -> TimelineEntry.of(event, names)).toList());
 		}
 
 	}
 
 	/** fromStatus is null on the first line (the claim was submitted); message is only there when one was given. */
 	public record TimelineEntry(@Schema(nullable = true) ClaimStatus fromStatus, ClaimStatus toStatus, UUID actorId,
-			@Schema(nullable = true) String message, Instant occurredAt) {
+			String actorName, @Schema(nullable = true) String message, Instant occurredAt) {
 
-		static TimelineEntry of(ClaimEvent event) {
+		static TimelineEntry of(ClaimEvent event, Map<UUID, String> names) {
 			return new TimelineEntry(event.getFromStatus(), event.getToStatus(), event.getActorId(),
-					event.getMessage(), event.getOccurredAt());
+					nameOf(event.getActorId(), names), event.getMessage(), event.getOccurredAt());
 		}
 
+	}
+
+	/** Every person on a claim has an account (the foreign keys see to that), so the fallback is only a guard. */
+	private static String nameOf(UUID id, Map<UUID, String> names) {
+		return names.getOrDefault(id, "Unknown");
 	}
 
 }

@@ -8,6 +8,7 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 import { AgentLayout } from './layouts/AgentLayout';
 import { CustomerLayout } from './layouts/CustomerLayout';
+import { ClaimPage } from './pages/claim/ClaimPage';
 import { ClaimsPage } from './pages/ClaimsPage';
 import { ComingSoonPage } from './pages/ComingSoonPage';
 import { HomePage } from './pages/HomePage';
@@ -26,7 +27,7 @@ export const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: 'claims', element: <ClaimsPage /> },
       { path: 'claims/new', element: <NewClaimPage /> },
-      { path: 'claims/:claimId', element: <ComingSoonPage title="Claim" /> },
+      { path: 'claims/:claimId', element: <ClaimPage /> },
       { path: 'policies', element: <PoliciesPage /> },
       { path: 'profile', element: <ProfilePage /> },
       { path: 'notifications', element: <NotificationsPage claimPath={(id) => `/claims/${id}`} /> },

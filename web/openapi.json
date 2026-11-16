@@ -469,9 +469,16 @@
             "format" : "uuid",
             "nullable" : true
           },
+          "assignedAgentName" : {
+            "type" : "string",
+            "nullable" : true
+          },
           "claimType" : {
             "type" : "string",
             "enum" : [ "FLIGHT_DELAY", "BAGGAGE_DELAYED", "LOST_OR_DAMAGED_BAGGAGE", "TRIP_CANCELLATION" ]
+          },
+          "customerName" : {
+            "type" : "string"
           },
           "decisionReason" : {
             "type" : "string",
@@ -520,7 +527,7 @@
             "format" : "int64"
           }
         },
-        "required" : [ "amountClaimed", "claimType", "description", "documents", "id", "incidentDate", "policyId", "reference", "status", "submittedAt", "timeline", "version" ]
+        "required" : [ "amountClaimed", "claimType", "customerName", "description", "documents", "id", "incidentDate", "policyId", "reference", "status", "submittedAt", "timeline", "version" ]
       },
       "ClaimSummary" : {
         "type" : "object",
@@ -540,6 +547,9 @@
           "claimType" : {
             "type" : "string",
             "enum" : [ "FLIGHT_DELAY", "BAGGAGE_DELAYED", "LOST_OR_DAMAGED_BAGGAGE", "TRIP_CANCELLATION" ]
+          },
+          "customerName" : {
+            "type" : "string"
           },
           "id" : {
             "type" : "string",
@@ -565,7 +575,7 @@
             "format" : "int64"
           }
         },
-        "required" : [ "amountClaimed", "claimType", "id", "policyId", "reference", "status", "submittedAt", "version" ]
+        "required" : [ "amountClaimed", "claimType", "customerName", "id", "policyId", "reference", "status", "submittedAt", "version" ]
       },
       "DownloadLink" : {
         "type" : "object",
@@ -789,6 +799,9 @@
             "type" : "string",
             "format" : "uuid"
           },
+          "actorName" : {
+            "type" : "string"
+          },
           "fromStatus" : {
             "type" : "string",
             "nullable" : true,
@@ -807,7 +820,7 @@
             "enum" : [ "SUBMITTED", "UNDER_REVIEW", "MORE_INFO_NEEDED", "APPROVED", "REJECTED" ]
           }
         },
-        "required" : [ "actorId", "occurredAt", "toStatus" ]
+        "required" : [ "actorId", "actorName", "occurredAt", "toStatus" ]
       }
     }
   }

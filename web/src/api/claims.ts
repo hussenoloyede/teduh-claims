@@ -7,6 +7,8 @@ import { api, unwrap } from './client';
 import type { components } from './schema';
 
 export type ClaimSummary = components['schemas']['ClaimSummary'];
+export type ClaimDetails = components['schemas']['ClaimDetails'];
+export type TimelineEntry = components['schemas']['TimelineEntry'];
 export type ClaimStatus = ClaimSummary['status'];
 export type ClaimType = ClaimSummary['claimType'];
 
@@ -38,4 +40,25 @@ export const myClaimsQueryKey = ['claims', 'mine'] as const;
 /** The signed-in customer's claims, newest first (the API sorts them). */
 export function useMyClaims() {
   return useQuery({ queryKey: myClaimsQueryKey, queryFn: () => unwrap(api.GET('/api/claims')) });
+}
+
+export const claimQueryKey = (id: string) => ['claims', 'one', id] as const;
+
+/** One claim with its documents and timeline. Someone else's claim answers 404, like one that doesn't exist. */
+export function useClaim(id: string) {
+  return useQuery({
+    queryKey: claimQueryKey(id),
+    queryFn: () => unwrap(api.GET('/api/claims/{id}', { params: { path: { id } } })),
+  });
+}
+
+/**
+ * Asks the API for a 15-minute link to one document, then follows it. The link answers with
+ * Content-Disposition: attachment, so the browser downloads the file and the page stays where it is.
+ */
+export async function downloadDocument(claimId: string, documentId: string): Promise<void> {
+  const link = await unwrap(
+    api.GET('/api/claims/{id}/documents/{documentId}/link', { params: { path: { id: claimId, documentId } } }),
+  );
+  window.location.assign(link.url);
 }

@@ -3,7 +3,9 @@ package my.teduh.claims.claims;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import my.teduh.claims.accounts.NameLookup;
 import my.teduh.claims.accounts.SignedInUser;
 import my.teduh.claims.claims.ClaimApi.ApproveRequest;
 import my.teduh.claims.claims.ClaimApi.ClaimDetails;
@@ -55,8 +58,11 @@ class ClaimController {
 
 	private final ClaimService service;
 
-	ClaimController(ClaimService service) {
+	private final NameLookup names;
+
+	ClaimController(ClaimService service, NameLookup names) {
 		this.service = service;
+		this.names = names;
 	}
 
 	/**
@@ -94,7 +100,11 @@ class ClaimController {
 			}
 			claims = service.claimsOf(me.id());
 		}
-		return claims.stream().map(ClaimSummary::of).toList();
+		// One name lookup for the whole list, not one per claim.
+		Set<UUID> people = new HashSet<>();
+		claims.forEach(claim -> people.add(claim.getCustomerId()));
+		var known = names.namesOf(people);
+		return claims.stream().map(claim -> ClaimSummary.of(claim, known)).toList();
 	}
 
 	/** Agents can open any claim. A customer opening someone else's claim gets the same 404 as a made-up id. */
@@ -153,7 +163,12 @@ class ClaimController {
 	}
 
 	private ClaimDetails details(Claim claim) {
-		return ClaimDetails.of(claim, service.documents(claim.getId()), service.timeline(claim.getId()));
+		List<ClaimEvent> timeline = service.timeline(claim.getId());
+		Set<UUID> people = new HashSet<>();
+		people.add(claim.getCustomerId());
+		people.add(claim.getAssignedAgentId());
+		timeline.forEach(event -> people.add(event.getActorId()));
+		return ClaimDetails.of(claim, service.documents(claim.getId()), timeline, names.namesOf(people));
 	}
 
 	/** Reads each file into memory. Fine at 10 MB a file and 5 files a request, the limits in application.yaml. */

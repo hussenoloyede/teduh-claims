@@ -116,6 +116,12 @@ class ClaimApiTest {
 		assertThat(strings(page, "$.documents[*].fileName")).containsExactly("receipt.pdf", "delay-report.pdf");
 		assertThat(strings(page, "$.timeline[*].toStatus"))
 			.containsExactly("SUBMITTED", "UNDER_REVIEW", "MORE_INFO_NEEDED", "UNDER_REVIEW", "APPROVED");
+
+		// Names come from the accounts module, so the page can say who did what. Every test person is "Test user".
+		assertThat(read(page, "$.customerName")).isEqualTo("Test user");
+		assertThat(read(page, "$.assignedAgentName")).isEqualTo("Test user");
+		assertThat(strings(page, "$.timeline[*].actorName")).hasSize(5).containsOnly("Test user");
+		assertThat(strings(get("/api/claims", aisyah), "$[*].customerName")).containsOnly("Test user");
 	}
 
 	@Test

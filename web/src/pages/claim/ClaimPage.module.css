@@ -1,0 +1,167 @@
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  justify-self: start;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-brand);
+  text-decoration: none;
+}
+
+.back:hover {
+  text-decoration: underline;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.reference {
+  font-size: var(--text-size-2xl);
+  line-height: 30px;
+  white-space: nowrap;
+}
+
+.plan {
+  font-size: var(--text-size-xs);
+  color: var(--color-text-muted);
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.quote {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-brand);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  background: var(--color-bg-subtle);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-size-xl);
+  line-height: 26px;
+}
+
+.count {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-size-xs);
+  line-height: 18px;
+  color: var(--color-text-brand);
+  background: var(--color-brand-subtle);
+}
+
+/* The agent's request on C08: warm, like the More info needed badge. */
+.request {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  color: var(--status-more-info-needed-text);
+  background: color-mix(in srgb, var(--status-more-info-needed-bg) 55%, white);
+}
+
+.request h2 {
+  font-size: var(--text-size-lg);
+  line-height: 22px;
+}
+
+.request blockquote {
+  margin: 0;
+  font-size: var(--text-size-md);
+  color: var(--color-text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* C09 and C10: the decision, with the amount when approved and the agent's reason. */
+.decision {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-left: 4px solid;
+  border-radius: var(--radius-xl);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-card);
+}
+
+.decision[data-outcome='approved'] {
+  border-color: var(--status-approved-text);
+}
+
+.decision[data-outcome='rejected'] {
+  border-color: var(--status-rejected-text);
+}
+
+.decision h2 {
+  font-size: var(--text-size-xl);
+  line-height: 26px;
+}
+
+.decision[data-outcome='approved'] h2 {
+  color: var(--status-approved-text);
+}
+
+.decision[data-outcome='rejected'] h2 {
+  color: var(--status-rejected-text);
+}
+
+.amount {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-family: var(--font-heading);
+  font-size: var(--text-size-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 36px;
+}
+
+.claimedWas {
+  font-family: var(--font-body);
+  font-size: var(--text-size-sm);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-muted);
+}
+
+.reason {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.reason blockquote {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.reason figcaption {
+  font-size: var(--text-size-xs);
+  color: var(--color-text-muted);
+}
+
+.reason figcaption::before {
+  content: '- ';
+}
+
+.note {
+  font-size: var(--text-size-sm);
+  color: var(--color-text-muted);
+}

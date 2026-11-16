@@ -65,6 +65,8 @@ const fieldId: Record<keyof NewClaimValues, string> = {
 // going back keeps what was typed. Each step checks its own fields before moving on; Submit checks them all
 // again, and the server checks everything once more.
 //
+// After submitting, the customer lands on the new claim's page with a "Claim submitted" banner.
+//
 // Left out from the design: DuitNow and payout timing, "reviewed within 24 hours", the Bank Negara and
 // NRIC lines. The app makes no payments and promises no times.
 export function NewClaimPage() {
@@ -157,7 +159,7 @@ export function NewClaimPage() {
     onSuccess: (created) => {
       void queryClient.invalidateQueries({ queryKey: myClaimsQueryKey });
       void queryClient.invalidateQueries({ queryKey: inboxQueryKey });
-      void navigate('/claims', { state: { submitted: created.reference } });
+      void navigate(`/claims/${created.id}`, { state: { submitted: true } });
     },
   });
 

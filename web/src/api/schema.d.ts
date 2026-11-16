@@ -243,8 +243,10 @@ export interface components {
             approvedAmount?: number | null;
             /** Format: uuid */
             assignedAgentId?: string | null;
+            assignedAgentName?: string | null;
             /** @enum {string} */
             claimType: "FLIGHT_DELAY" | "BAGGAGE_DELAYED" | "LOST_OR_DAMAGED_BAGGAGE" | "TRIP_CANCELLATION";
+            customerName: string;
             decisionReason?: string | null;
             description: string;
             documents: components["schemas"]["StoredDocument"][];
@@ -270,6 +272,7 @@ export interface components {
             assignedAgentId?: string | null;
             /** @enum {string} */
             claimType: "FLIGHT_DELAY" | "BAGGAGE_DELAYED" | "LOST_OR_DAMAGED_BAGGAGE" | "TRIP_CANCELLATION";
+            customerName: string;
             /** Format: uuid */
             id: string;
             /** Format: uuid */
@@ -370,6 +373,7 @@ export interface components {
         TimelineEntry: {
             /** Format: uuid */
             actorId: string;
+            actorName: string;
             /** @enum {string|null} */
             fromStatus?: "SUBMITTED" | "UNDER_REVIEW" | "MORE_INFO_NEEDED" | "APPROVED" | "REJECTED" | null;
             message?: string | null;
