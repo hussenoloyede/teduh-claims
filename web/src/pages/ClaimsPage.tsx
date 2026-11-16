@@ -1,7 +1,9 @@
 import { FileText, Plus } from 'lucide-react';
 import { useState } from 'react';
+import { useLocation } from 'react-router';
 import { isDecided, useMyClaims } from '../api/claims';
 import { planNames, usePolicies } from '../api/policies';
+import { Banner } from '../components/Banner/Banner';
 import { ButtonLink } from '../components/Button/Button';
 import { EmptyState } from '../components/EmptyState/EmptyState';
 import { FilterChips } from '../components/FilterChips/FilterChips';
@@ -21,6 +23,8 @@ export function ClaimsPage() {
   const claims = useMyClaims();
   const policies = usePolicies();
   const [filter, setFilter] = useState<Filter>('all');
+  // Set by the new-claim form after a successful submit.
+  const submitted = (useLocation().state as { submitted?: string } | null)?.submitted;
 
   const all = claims.data ?? [];
   const open = all.filter((claim) => !isDecided(claim.status));
@@ -34,6 +38,12 @@ export function ClaimsPage() {
         <h1>Your claims</h1>
         <p>Every claim you have made, newest first.</p>
       </div>
+
+      {submitted && (
+        <Banner variant="success" title={`Claim ${submitted} submitted`}>
+          You'll get a notification when an agent starts reviewing it.
+        </Banner>
+      )}
 
       {claims.isPending && <SectionLoading label="Loading your claims…" />}
       {claims.isError && <PageError message={claims.error.message} onRetry={() => void claims.refetch()} />}

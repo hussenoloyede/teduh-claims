@@ -11,6 +11,7 @@ import { CustomerLayout } from './layouts/CustomerLayout';
 import { ClaimsPage } from './pages/ClaimsPage';
 import { ComingSoonPage } from './pages/ComingSoonPage';
 import { HomePage } from './pages/HomePage';
+import { NewClaimPage } from './pages/newClaim/NewClaimPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { PoliciesPage } from './pages/PoliciesPage';
@@ -24,7 +25,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: 'claims', element: <ClaimsPage /> },
-      { path: 'claims/new', element: <ComingSoonPage title="New claim" /> },
+      { path: 'claims/new', element: <NewClaimPage /> },
       { path: 'claims/:claimId', element: <ComingSoonPage title="Claim" /> },
       { path: 'policies', element: <PoliciesPage /> },
       { path: 'profile', element: <ProfilePage /> },

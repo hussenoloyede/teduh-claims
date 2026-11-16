@@ -1,0 +1,33 @@
+.summary {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--status-rejected-text) 30%, transparent);
+  border-radius: var(--radius-lg);
+  color: var(--status-rejected-text);
+  background: var(--status-rejected-bg);
+}
+
+.summary:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-bold);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: var(--space-8);
+}
+
+.list a {
+  color: inherit;
+  font-weight: var(--font-weight-medium);
+}

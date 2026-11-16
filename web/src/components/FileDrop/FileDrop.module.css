@@ -1,0 +1,158 @@
+.wrap {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.zone {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-4);
+  border: 2px dashed var(--color-border-field);
+  border-radius: var(--radius-xl);
+  text-align: center;
+  background: var(--color-bg);
+}
+
+.zone[data-dragging] {
+  border-color: var(--color-brand);
+  background: var(--color-brand-subtle);
+}
+
+.cloud {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  color: var(--color-text-brand);
+  background: var(--color-brand-subtle);
+}
+
+.choose {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-5);
+  border: 0;
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-on-brand);
+  background: var(--color-brand);
+  cursor: pointer;
+}
+
+.choose:hover {
+  background: var(--color-brand-hover);
+}
+
+.help {
+  font-size: var(--text-size-xs);
+  color: var(--color-text-muted);
+}
+
+.error {
+  font-size: var(--text-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-danger);
+}
+
+.listBox {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.listTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-semibold);
+}
+
+.count {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: var(--text-size-xs);
+  line-height: 18px;
+  color: var(--color-text-brand);
+  background: var(--color-brand-subtle);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-card);
+}
+
+.file[data-problem] {
+  border-color: var(--color-danger);
+  background: var(--status-rejected-bg);
+}
+
+.fileIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-brand);
+  background: var(--color-bg-subtle);
+}
+
+.file[data-problem] .fileIcon {
+  color: var(--color-danger);
+  background: var(--color-bg);
+}
+
+.fileText {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+
+.fileName {
+  font-weight: var(--font-weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.fileMeta {
+  font-size: var(--text-size-xs);
+  color: var(--color-text-muted);
+}
+
+.file[data-problem] .fileMeta {
+  color: var(--color-danger);
+}
+
+.remove {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.remove:hover {
+  background: var(--color-bg-subtle);
+}

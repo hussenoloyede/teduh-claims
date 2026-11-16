@@ -1,0 +1,53 @@
+.banner {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+}
+
+.banner[data-variant='info'] {
+  color: var(--color-text);
+  background: var(--color-bg-subtle);
+  border-color: var(--color-border);
+}
+
+.banner[data-variant='success'] {
+  color: var(--status-approved-text);
+  background: color-mix(in srgb, var(--status-approved-bg) 45%, white);
+  border-color: var(--status-approved-bg);
+}
+
+.banner[data-variant='warning'] {
+  color: var(--status-more-info-needed-text);
+  background: color-mix(in srgb, var(--status-more-info-needed-bg) 55%, white);
+  border-color: var(--status-more-info-needed-bg);
+}
+
+.banner[data-variant='error'] {
+  color: var(--status-rejected-text);
+  background: var(--status-rejected-bg);
+  border-color: color-mix(in srgb, var(--status-rejected-text) 30%, transparent);
+}
+
+.icon {
+  flex: none;
+  margin-top: 1px;
+}
+
+.body {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.title {
+  font-weight: var(--font-weight-bold);
+}
+
+.text {
+  font-size: var(--text-size-sm);
+}
+
+.action {
+  margin-top: var(--space-2);
+}

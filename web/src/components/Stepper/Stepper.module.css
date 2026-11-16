@@ -1,0 +1,37 @@
+.stepper {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.labels {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.count {
+  font-size: var(--text-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-brand);
+}
+
+.name {
+  font-size: var(--text-size-xs);
+  color: var(--color-text-muted);
+}
+
+.track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-brand-subtle);
+}
+
+.fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-brand);
+  transition: width 200ms ease;
+}

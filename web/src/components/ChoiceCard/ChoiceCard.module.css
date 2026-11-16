@@ -1,0 +1,91 @@
+.card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 2px solid transparent;
+  border-radius: var(--radius-xl);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+}
+
+/* The radio itself is drawn by the card; it stays in the page, so keyboard and screen readers use it. */
+.input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.card:has(.input:checked) {
+  border-color: var(--color-brand);
+  background: var(--color-brand-subtle);
+}
+
+.card:has(.input:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.card:has(.input[aria-invalid='true']) {
+  border-color: var(--color-danger);
+}
+
+.icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  color: var(--color-text-brand);
+  background: var(--color-bg-subtle);
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-2);
+}
+
+.title {
+  font-weight: var(--font-weight-bold);
+}
+
+.aside {
+  font-size: var(--text-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+}
+
+.description {
+  font-size: var(--text-size-sm);
+  color: var(--color-text-muted);
+}
+
+.tick {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--color-border-field);
+  border-radius: var(--radius-full);
+  color: transparent;
+}
+
+.card:has(.input:checked) .tick {
+  border-color: var(--color-brand);
+  color: var(--color-text-on-brand);
+  background: var(--color-brand);
+}
