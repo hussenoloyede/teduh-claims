@@ -1,40 +1,54 @@
 import { LogOut } from 'lucide-react';
 import { useMe } from '../api/auth';
+import { useMyClaims } from '../api/claims';
+import { coverState, usePolicies } from '../api/policies';
 import { Avatar } from '../components/Avatar/Avatar';
 import { Button } from '../components/Button/Button';
+import { todayInMalaysia } from '../lib/format';
 import { useSignOut } from '../useSignOut';
+import page from './Page.module.css';
 import styles from './ProfilePage.module.css';
 
-// /profile for customers: who is signed in, and the way out. Customers sign out here; agents use the
-// header. The rest of C15 (contact details, preferences) has nothing behind it yet, so it's left out.
+// C15: who is signed in, how many policies and claims they have, and the way out. Customers sign out here;
+// agents use the header.
 export function ProfilePage() {
   const me = useMe();
+  const policies = usePolicies();
+  const claims = useMyClaims();
   const signOut = useSignOut();
   if (!me.data) return null; // CustomerLayout has already made sure someone is signed in.
 
+  const today = todayInMalaysia();
+  const active = policies.data?.filter((policy) => coverState(policy, today) === 'active').length;
+
   return (
-    <div className={styles.page}>
+    <div className={page.page}>
       <title>Profile · Teduh Claims</title>
-      <h1>Profile</h1>
-      <section className={styles.card} aria-label="Your account">
-        <Avatar name={me.data.displayName} />
-        <dl className={styles.facts}>
+      <div className={page.intro}>
+        <h1>Profile</h1>
+        <p>Your account in this demo.</p>
+      </div>
+      <section className={page.panel} aria-label="Your account">
+        <div className={styles.who}>
+          <Avatar name={me.data.displayName} />
+          <div className={styles.name}>
+            <p className={styles.displayName}>{me.data.displayName}</p>
+            <p className={styles.email}>{me.data.email}</p>
+          </div>
+          <span className={styles.role}>Customer</span>
+        </div>
+        <dl className={page.facts}>
           <div>
-            <dt>Name</dt>
-            <dd>{me.data.displayName}</dd>
+            <dt>Policies</dt>
+            <dd>{active === undefined ? '…' : `${active} active`}</dd>
           </div>
           <div>
-            <dt>Email</dt>
-            <dd>{me.data.email}</dd>
-          </div>
-          <div>
-            <dt>Account</dt>
-            <dd>Demo customer</dd>
+            <dt>Claims</dt>
+            <dd>{claims.data ? `${claims.data.length} made` : '…'}</dd>
           </div>
         </dl>
       </section>
       <Button
-        variant="secondary"
         fullWidth
         icon={<LogOut size={16} aria-hidden="true" />}
         loading={signOut.isPending}

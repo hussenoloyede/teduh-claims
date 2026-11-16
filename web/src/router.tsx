@@ -8,8 +8,12 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 import { AgentLayout } from './layouts/AgentLayout';
 import { CustomerLayout } from './layouts/CustomerLayout';
+import { ClaimsPage } from './pages/ClaimsPage';
 import { ComingSoonPage } from './pages/ComingSoonPage';
+import { HomePage } from './pages/HomePage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { NotificationsPage } from './pages/NotificationsPage';
+import { PoliciesPage } from './pages/PoliciesPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { SignInPage } from './pages/SignInPage';
 
@@ -18,11 +22,13 @@ export const router = createBrowserRouter([
   {
     element: <CustomerLayout />,
     children: [
-      { index: true, element: <ComingSoonPage title="Home" /> },
-      { path: 'claims', element: <ComingSoonPage title="Claims" /> },
-      { path: 'policies', element: <ComingSoonPage title="Policies" /> },
+      { index: true, element: <HomePage /> },
+      { path: 'claims', element: <ClaimsPage /> },
+      { path: 'claims/new', element: <ComingSoonPage title="New claim" /> },
+      { path: 'claims/:claimId', element: <ComingSoonPage title="Claim" /> },
+      { path: 'policies', element: <PoliciesPage /> },
       { path: 'profile', element: <ProfilePage /> },
-      { path: 'notifications', element: <ComingSoonPage title="Notifications" /> },
+      { path: 'notifications', element: <NotificationsPage claimPath={(id) => `/claims/${id}`} /> },
     ],
   },
   {
@@ -33,7 +39,8 @@ export const router = createBrowserRouter([
       { path: 'queue', element: <ComingSoonPage title="Claims queue" /> },
       { path: 'assigned', element: <ComingSoonPage title="Assigned reviews" /> },
       { path: 'history', element: <ComingSoonPage title="History" /> },
-      { path: 'notifications', element: <ComingSoonPage title="Notifications" /> },
+      { path: 'claims/:claimId', element: <ComingSoonPage title="Claim review" /> },
+      { path: 'notifications', element: <NotificationsPage claimPath={(id) => `/agent/claims/${id}`} /> },
     ],
   },
   { path: '*', element: <NotFoundPage /> },

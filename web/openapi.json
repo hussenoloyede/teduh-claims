@@ -528,6 +528,10 @@
           "amountClaimed" : {
             "type" : "number"
           },
+          "approvedAmount" : {
+            "type" : "number",
+            "nullable" : true
+          },
           "assignedAgentId" : {
             "type" : "string",
             "format" : "uuid",
@@ -538,6 +542,10 @@
             "enum" : [ "FLIGHT_DELAY", "BAGGAGE_DELAYED", "LOST_OR_DAMAGED_BAGGAGE", "TRIP_CANCELLATION" ]
           },
           "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "policyId" : {
             "type" : "string",
             "format" : "uuid"
           },
@@ -557,7 +565,7 @@
             "format" : "int64"
           }
         },
-        "required" : [ "amountClaimed", "claimType", "id", "reference", "status", "submittedAt", "version" ]
+        "required" : [ "amountClaimed", "claimType", "id", "policyId", "reference", "status", "submittedAt", "version" ]
       },
       "DownloadLink" : {
         "type" : "object",

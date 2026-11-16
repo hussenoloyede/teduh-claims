@@ -1,0 +1,36 @@
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-size: var(--text-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  background: var(--color-brand-subtle);
+  cursor: pointer;
+}
+
+.chip[aria-pressed='true'] {
+  color: var(--color-text-on-brand);
+  background: var(--color-brand);
+}
+
+.count {
+  min-width: 18px;
+  padding: 0 6px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-size-2xs);
+  line-height: 18px;
+  text-align: center;
+  background: var(--color-bg);
+  color: var(--color-text);
+}

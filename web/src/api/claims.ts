@@ -2,6 +2,8 @@
 // ClaimStatus.java and ClaimType.java. The API sends the enum name (SUBMITTED); the screens show the label.
 // If Java gains a status, TypeScript stops the build until it has a label here.
 
+import { useQuery } from '@tanstack/react-query';
+import { api, unwrap } from './client';
 import type { components } from './schema';
 
 export type ClaimSummary = components['schemas']['ClaimSummary'];
@@ -25,3 +27,15 @@ export const claimTypeLabel: Record<ClaimType, string> = {
   LOST_OR_DAMAGED_BAGGAGE: 'Lost or damaged baggage',
   TRIP_CANCELLATION: 'Trip cancellation',
 };
+
+/** Approved and rejected are final; every other status means the claim is still in progress. */
+export function isDecided(status: ClaimStatus): boolean {
+  return status === 'APPROVED' || status === 'REJECTED';
+}
+
+export const myClaimsQueryKey = ['claims', 'mine'] as const;
+
+/** The signed-in customer's claims, newest first (the API sorts them). */
+export function useMyClaims() {
+  return useQuery({ queryKey: myClaimsQueryKey, queryFn: () => unwrap(api.GET('/api/claims')) });
+}

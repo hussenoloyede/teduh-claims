@@ -265,12 +265,15 @@ export interface components {
         };
         ClaimSummary: {
             amountClaimed: number;
+            approvedAmount?: number | null;
             /** Format: uuid */
             assignedAgentId?: string | null;
             /** @enum {string} */
             claimType: "FLIGHT_DELAY" | "BAGGAGE_DELAYED" | "LOST_OR_DAMAGED_BAGGAGE" | "TRIP_CANCELLATION";
             /** Format: uuid */
             id: string;
+            /** Format: uuid */
+            policyId: string;
             reference: string;
             /** @enum {string} */
             status: "SUBMITTED" | "UNDER_REVIEW" | "MORE_INFO_NEEDED" | "APPROVED" | "REJECTED";

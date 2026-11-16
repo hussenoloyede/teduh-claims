@@ -9,10 +9,13 @@ type ClaimCardProps = {
   reference: string;
   claimType: ClaimType;
   amountClaimed: number;
+  /** Shown instead of the claimed amount once a claim is approved. */
+  approvedAmount?: number | null;
   status: ClaimStatus;
   /** When the claim was submitted, as the API sends it (UTC). */
   submittedAt: string;
-  policyName: string;
+  /** The plan the claim is under. Left out of the line when not known yet. */
+  policyName?: string;
   /** The claim page this card opens. */
   href: string;
 };
@@ -22,11 +25,13 @@ export function ClaimCard({
   reference,
   claimType,
   amountClaimed,
+  approvedAmount,
   status,
   submittedAt,
   policyName,
   href,
 }: ClaimCardProps) {
+  const approved = status === 'APPROVED' && approvedAmount != null;
   return (
     <Link className={styles.card} to={href}>
       <div className={styles.head}>
@@ -36,7 +41,8 @@ export function ClaimCard({
         <div className={styles.title}>
           <span className={styles.reference}>{reference}</span>
           <span className={styles.meta}>
-            {policyName} · {formatDate(submittedAt)}
+            {policyName ? `${policyName} · ` : ''}
+            {formatDate(submittedAt)}
           </span>
         </div>
         <StatusBadge status={status} />
@@ -47,8 +53,8 @@ export function ClaimCard({
           <dd className={styles.value}>{claimTypeLabel[claimType]}</dd>
         </div>
         <div className={styles.amount}>
-          <dt>Claimed amount</dt>
-          <dd className={styles.money}>{formatMoney(amountClaimed)}</dd>
+          <dt>{approved ? 'Approved amount' : 'Claimed amount'}</dt>
+          <dd className={styles.money}>{formatMoney(approved ? approvedAmount : amountClaimed)}</dd>
         </div>
       </dl>
     </Link>

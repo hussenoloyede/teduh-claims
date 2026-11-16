@@ -40,6 +40,22 @@ export const MoreInfoNeeded: Story = {
   },
 };
 
+export const ApprovedForLess: Story = {
+  args: {
+    reference: 'CLM-2026-000017',
+    claimType: 'BAGGAGE_DELAYED',
+    amountClaimed: 450,
+    approvedAmount: 400,
+    status: 'APPROVED',
+    submittedAt: '2026-11-07T13:14:00Z',
+  },
+  play: async ({ canvas }) => {
+    const link = canvas.getByRole('link');
+    await expect(link).toHaveTextContent('Approved amount');
+    await expect(link).toHaveTextContent('RM 400.00');
+  },
+};
+
 export const Rejected: Story = {
   args: {
     reference: 'CLM-2026-000009',
@@ -59,6 +75,7 @@ export const List: Story = {
         reference="CLM-2026-000017"
         claimType="BAGGAGE_DELAYED"
         amountClaimed={450}
+        approvedAmount={400}
         status="APPROVED"
         submittedAt="2026-11-07T13:14:00Z"
       />

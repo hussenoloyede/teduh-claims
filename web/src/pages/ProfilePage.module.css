@@ -1,41 +1,36 @@
-.page {
-  display: grid;
-  gap: var(--space-4);
-  max-width: 600px;
-  margin: 0 auto;
-  padding: var(--space-6) var(--space-4);
-}
-
-.page h1 {
-  font-size: var(--text-size-3xl);
-  line-height: 32px;
-}
-
-.card {
-  display: grid;
-  gap: var(--space-4);
-  justify-items: start;
-  padding: var(--space-5);
-  border-radius: var(--radius-xl);
-  background: var(--color-bg);
-  box-shadow: var(--shadow-card);
-}
-
-.facts {
-  display: grid;
+.who {
+  display: flex;
+  align-items: center;
   gap: var(--space-3);
-  width: 100%;
-  margin: 0;
 }
 
-.facts dt {
-  font-size: var(--text-size-xs);
-  line-height: 16px;
-  color: var(--color-text-muted);
+.name {
+  flex: 1;
+  min-width: 0;
 }
 
-.facts dd {
-  margin: 0;
+.displayName {
+  font-family: var(--font-heading);
+  font-size: var(--text-size-xl);
   font-weight: var(--font-weight-semibold);
+  line-height: 26px;
+}
+
+.email {
+  font-size: var(--text-size-xs);
+  color: var(--color-text-muted);
   overflow-wrap: anywhere;
+}
+
+.role {
+  flex: none;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: var(--text-size-2xs);
+  font-weight: var(--font-weight-bold);
+  line-height: 18px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-brand);
+  background: var(--color-brand-subtle);
 }

@@ -1,4 +1,5 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+import { Link, type LinkProps } from 'react-router';
 import styles from './Button.module.css';
 
 type ButtonProps = ComponentPropsWithoutRef<'button'> & {
@@ -46,5 +47,27 @@ export function Button({
       {loading ? <span className={styles.spinner} aria-hidden="true" /> : icon}
       {children}
     </button>
+  );
+}
+
+type ButtonLinkProps = LinkProps & {
+  variant?: 'primary' | 'secondary';
+  fullWidth?: boolean;
+  icon?: ReactNode;
+};
+
+/**
+ * A link that looks like a button, for actions that go to another page ("Start a claim"). It stays a link,
+ * so screen readers announce it as one, and it opens in a new tab like any link.
+ */
+export function ButtonLink({ variant = 'primary', fullWidth = false, icon, className, children, ...rest }: ButtonLinkProps) {
+  const classes = [styles.button, styles[variant], styles.md, fullWidth && styles.fullWidth, className]
+    .filter(Boolean)
+    .join(' ');
+  return (
+    <Link {...rest} className={classes}>
+      {icon}
+      {children}
+    </Link>
   );
 }

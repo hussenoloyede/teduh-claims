@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatDateTime, formatFileSize, formatMoney } from './format';
+import { formatDate, formatDateTime, formatFileSize, formatMoney, todayInMalaysia } from './format';
 
 describe('formatMoney', () => {
   it('writes RM and two decimals', () => {
@@ -35,5 +35,15 @@ describe('formatFileSize', () => {
     [10485760, '10 MB'],
   ])('%i bytes is %s', (bytes, text) => {
     expect(formatFileSize(bytes)).toBe(text);
+  });
+});
+
+describe('todayInMalaysia', () => {
+  it('is already the next day in Malaysia late in the UTC evening', () => {
+    expect(todayInMalaysia(new Date('2026-11-15T17:30:00Z'))).toBe('2026-11-16');
+  });
+
+  it('matches the UTC date earlier in the day', () => {
+    expect(todayInMalaysia(new Date('2026-11-15T03:00:00Z'))).toBe('2026-11-15');
   });
 });

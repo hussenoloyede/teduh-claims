@@ -1,0 +1,125 @@
+/* Shared by the signed-in pages: one column, phone first, capped for wide screens. */
+.page {
+  display: grid;
+  gap: var(--space-6);
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+}
+
+.wide {
+  max-width: 1200px;
+}
+
+.intro {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.intro h1 {
+  font-size: var(--text-size-4xl);
+  line-height: 36px;
+  letter-spacing: -0.02em;
+}
+
+.intro p {
+  color: var(--color-text-muted);
+}
+
+.section {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.stack {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.panel {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-card);
+}
+
+.panelTitle {
+  display: grid;
+  gap: 2px;
+}
+
+.panelTitle h2,
+.panelTitle h3 {
+  font-size: var(--text-size-xl);
+  line-height: 26px;
+}
+
+.panelTitle p {
+  font-size: var(--text-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* Label above, value under it, in tinted boxes: the limits and dates on C14, the counts on C15. */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.facts > div {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.facts dt {
+  font-size: var(--text-size-xs);
+  line-height: 16px;
+  color: var(--color-text-muted);
+}
+
+.facts dd {
+  margin: 2px 0 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.tip {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-subtle);
+}
+
+.tip svg {
+  flex: none;
+  color: var(--color-text-brand);
+}
+
+.tip strong {
+  display: block;
+  margin-bottom: var(--space-1);
+}
+
+.tip p {
+  color: var(--color-text-muted);
+}
+
+.quiet {
+  padding: var(--space-4);
+  color: var(--color-text-muted);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}

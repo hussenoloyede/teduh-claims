@@ -51,14 +51,18 @@ public final class ClaimApi {
 	public record RejectRequest(@NotNull Long version, @Schema(nullable = true) String reason) {
 	}
 
-	/** One row of a list: a customer's claims or a queue tab. */
-	public record ClaimSummary(UUID id, String reference, ClaimType claimType, BigDecimal amountClaimed,
-			ClaimStatus status, @Schema(nullable = true) UUID assignedAgentId, Instant submittedAt, long version) {
+	/**
+	 * One row of a list: a customer's claims or a queue tab. The policy id lets a list show the plan's name;
+	 * the approved amount lets an approved claim show what was paid rather than what was asked.
+	 */
+	public record ClaimSummary(UUID id, String reference, UUID policyId, ClaimType claimType,
+			BigDecimal amountClaimed, @Schema(nullable = true) BigDecimal approvedAmount, ClaimStatus status,
+			@Schema(nullable = true) UUID assignedAgentId, Instant submittedAt, long version) {
 
 		static ClaimSummary of(Claim claim) {
-			return new ClaimSummary(claim.getId(), claim.getReference(), claim.getClaimType(),
-					claim.getAmountClaimed(), claim.getStatus(), claim.getAssignedAgentId(), claim.getSubmittedAt(),
-					claim.getVersion());
+			return new ClaimSummary(claim.getId(), claim.getReference(), claim.getPolicyId(), claim.getClaimType(),
+					claim.getAmountClaimed(), claim.getApprovedAmount(), claim.getStatus(), claim.getAssignedAgentId(),
+					claim.getSubmittedAt(), claim.getVersion());
 		}
 
 	}

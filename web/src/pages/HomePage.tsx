@@ -1,0 +1,92 @@
+import { FileText, Lightbulb, Plus } from 'lucide-react';
+import { useMe } from '../api/auth';
+import { isDecided, useMyClaims } from '../api/claims';
+import { coverState, limitsOf, planNames, usePolicies } from '../api/policies';
+import { ButtonLink } from '../components/Button/Button';
+import { EmptyState } from '../components/EmptyState/EmptyState';
+import { PageError, SectionLoading } from '../components/PageStatus/PageStatus';
+import { PolicyCard } from '../components/PolicyCard/PolicyCard';
+import { SectionHeader } from '../components/SectionHeader/SectionHeader';
+import { todayInMalaysia } from '../lib/format';
+import { ClaimCardList } from './claimCards';
+import styles from './Page.module.css';
+
+// C02. Left out although the design shows them: the emergency hotline (Teduh has none), and the promise of
+// payment "in 2 to 3 working days via DuitNow" (the app makes no payments).
+export function HomePage() {
+  const me = useMe();
+  const policies = usePolicies();
+  const claims = useMyClaims();
+  const today = todayInMalaysia();
+
+  const firstName = me.data?.displayName.split(' ')[0];
+  const activeCount = policies.data?.filter((policy) => coverState(policy, today) === 'active').length ?? 0;
+  const openCount = claims.data?.filter((claim) => !isDecided(claim.status)).length ?? 0;
+
+  return (
+    <div className={styles.page}>
+      <title>Home · Teduh Claims</title>
+      <div className={styles.intro}>
+        <h1>Hi, {firstName}</h1>
+        <p>Your travel cover and your claims, in one place.</p>
+      </div>
+
+      <section className={styles.section} aria-labelledby="home-policies">
+        <SectionHeader
+          id="home-policies"
+          title="Your policies"
+          badge={policies.data ? `${activeCount} active` : undefined}
+          link={{ to: '/policies', label: 'View all' }}
+        />
+        {policies.isPending && <SectionLoading label="Loading your policies…" />}
+        {policies.isError && <PageError message={policies.error.message} onRetry={() => void policies.refetch()} />}
+        {policies.data?.map((policy) => (
+          <PolicyCard
+            key={policy.policyId}
+            planName={policy.planName}
+            policyNumber={policy.policyNumber}
+            coverStart={policy.coverStart}
+            coverEnd={policy.coverEnd}
+            state={coverState(policy, today)}
+            covers={limitsOf(policy).map((limit) => limit.label)}
+            href="/policies"
+          />
+        ))}
+      </section>
+
+      <section className={styles.section} aria-labelledby="home-claims">
+        <SectionHeader
+          id="home-claims"
+          title="Your claims"
+          badge={claims.data ? `${openCount} in progress` : undefined}
+          link={claims.data?.length ? { to: '/claims', label: 'All claims' } : undefined}
+        />
+        {claims.isPending && <SectionLoading label="Loading your claims…" />}
+        {claims.isError && <PageError message={claims.error.message} onRetry={() => void claims.refetch()} />}
+        {claims.data?.length === 0 && (
+          <EmptyState icon={<FileText size={28} />} title="You haven't made a claim yet">
+            If something went wrong on your trip, start a claim and attach your receipts.
+          </EmptyState>
+        )}
+        {claims.data && claims.data.length > 0 && (
+          <ClaimCardList claims={claims.data.slice(0, 3)} plans={planNames(policies.data)} />
+        )}
+      </section>
+
+      <ButtonLink to="/claims/new" fullWidth icon={<Plus size={18} aria-hidden="true" />}>
+        Start a claim
+      </ButtonLink>
+
+      <aside className={styles.tip} aria-label="Tip">
+        <Lightbulb size={20} aria-hidden="true" />
+        <div>
+          <strong>Before you claim</strong>
+          <p>
+            Keep your receipts and any report from the airline. A clear, flat photo or a PDF of each one makes the
+            review easier.
+          </p>
+        </div>
+      </aside>
+    </div>
+  );
+}

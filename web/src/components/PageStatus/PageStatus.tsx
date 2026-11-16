@@ -33,3 +33,13 @@ export function PageError({ message, onRetry }: PageErrorProps) {
     </div>
   );
 }
+
+/** A small loading line inside a page, for one section's data. */
+export function SectionLoading({ label }: { label: string }) {
+  return (
+    <p className={styles.section} role="status">
+      <span className={styles.smallSpinner} aria-hidden="true" />
+      {label}
+    </p>
+  );
+}

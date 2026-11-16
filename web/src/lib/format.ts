@@ -49,3 +49,14 @@ export function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${Number((bytes / (1024 * 1024)).toFixed(1))} MB`;
 }
+
+const isoDay = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone });
+
+/**
+ * Today's date in Malaysia as "2026-11-16", the same form the API uses for dates such as a policy's cover
+ * start. Late in the evening UTC it is already tomorrow in Kuala Lumpur, so this never uses the browser's
+ * own time zone. (en-CA is the locale whose dates read year-month-day.)
+ */
+export function todayInMalaysia(now: Date = new Date()): string {
+  return isoDay.format(now);
+}
