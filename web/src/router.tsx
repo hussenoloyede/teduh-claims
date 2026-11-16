@@ -3,14 +3,15 @@
 // reload or a shared link lands on the right screen too.
 //
 // The two layouts are also the guards: a page inside CustomerLayout is only shown to a signed-in
-// customer, one inside AgentLayout only to an agent. Screens still to be built show ComingSoonPage.
+// customer, one inside AgentLayout only to an agent.
 
 import { createBrowserRouter, Navigate } from 'react-router';
 import { AgentLayout } from './layouts/AgentLayout';
 import { CustomerLayout } from './layouts/CustomerLayout';
+import { AssignedPage, HistoryPage, QueuePage } from './pages/agent/AgentListPages';
+import { ReviewPage } from './pages/agent/ReviewPage';
 import { ClaimPage } from './pages/claim/ClaimPage';
 import { ClaimsPage } from './pages/ClaimsPage';
-import { ComingSoonPage } from './pages/ComingSoonPage';
 import { HomePage } from './pages/HomePage';
 import { NewClaimPage } from './pages/newClaim/NewClaimPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -38,10 +39,10 @@ export const router = createBrowserRouter([
     element: <AgentLayout />,
     children: [
       { index: true, element: <Navigate to="queue" replace /> },
-      { path: 'queue', element: <ComingSoonPage title="Claims queue" /> },
-      { path: 'assigned', element: <ComingSoonPage title="Assigned reviews" /> },
-      { path: 'history', element: <ComingSoonPage title="History" /> },
-      { path: 'claims/:claimId', element: <ComingSoonPage title="Claim review" /> },
+      { path: 'queue', element: <QueuePage /> },
+      { path: 'assigned', element: <AssignedPage /> },
+      { path: 'history', element: <HistoryPage /> },
+      { path: 'claims/:claimId', element: <ReviewPage /> },
       { path: 'notifications', element: <NotificationsPage claimPath={(id) => `/agent/claims/${id}`} /> },
     ],
   },

@@ -16,6 +16,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+
 /**
  * The OpenAPI document, and the saved copy of it in web/openapi.json that the React app's types come from.
  */
@@ -27,13 +30,20 @@ class ApiDocsTest {
 	/** Relative to the repository root, where Maven runs the tests. */
 	private static final Path SAVED_COPY = Path.of("web", "openapi.json");
 
+	private static final JsonMapper JSON = JsonMapper.builder().build();
+
 	@Autowired
 	private MockMvcTester mvc;
 
 	/**
 	 * If an endpoint or a record changed, this rewrites web/openapi.json and fails, so the change can't slip
 	 * through unnoticed. Then: npm run api:types in web/, fix whatever TypeScript now complains about, and
-	 * commit both files. Line endings are ignored, because Windows and the Linux pipeline write them differently.
+	 * commit both files.
+	 *
+	 * The two are compared as JSON, not as text. The order of keys inside an object doesn't count: the library
+	 * that writes the document doesn't promise one (on 16 Nov it started putting "required" before "properties"
+	 * in every schema), and the order changes nothing in the generated types. Arrays, such as the required
+	 * lists and the enum values, must still match exactly. Line endings don't count either.
 	 */
 	@Test
 	void savedCopyForTheReactAppMatchesTheApi() throws IOException {
@@ -44,13 +54,20 @@ class ApiDocsTest {
 		if (!current.endsWith("\n")) {
 			current += "\n";
 		}
-		String saved = Files.exists(SAVED_COPY) ? Files.readString(SAVED_COPY).replace("\r\n", "\n") : "";
+		String saved = Files.exists(SAVED_COPY) ? Files.readString(SAVED_COPY) : "";
 
-		if (!current.equals(saved)) {
+		if (saved.isBlank() || !sameJson(current, saved)) {
 			Files.writeString(SAVED_COPY, current);
 			fail("web/openapi.json didn't match the API and has been rewritten. Run npm run api:types in web/, "
 					+ "check the React app still builds, and commit both files.");
 		}
+	}
+
+	/** Objects are equal when they hold the same keys and values in any order (JsonNode's own equals). */
+	private static boolean sameJson(String a, String b) {
+		JsonNode left = JSON.readTree(a);
+		JsonNode right = JSON.readTree(b);
+		return left.equals(right);
 	}
 
 	@Test

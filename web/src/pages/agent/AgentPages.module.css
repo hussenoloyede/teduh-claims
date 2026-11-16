@@ -1,0 +1,208 @@
+/* The agent's lists and the claim review page (laptop first, 1200 px wide at most). */
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.count {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-size-xs);
+  font-weight: var(--font-weight-bold);
+  line-height: 20px;
+  color: var(--color-text-on-brand);
+  background: var(--color-brand);
+}
+
+.footnote,
+.small {
+  font-size: var(--text-size-xs);
+  line-height: 18px;
+  color: var(--color-text-muted);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  justify-self: start;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-brand);
+  text-decoration: none;
+}
+
+.back:hover {
+  text-decoration: underline;
+}
+
+.claimHead {
+  gap: var(--space-2);
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.reference {
+  font-size: var(--text-size-3xl);
+  line-height: 36px;
+  white-space: nowrap;
+}
+
+.assignment {
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  background: var(--color-bg-subtle);
+}
+
+.assignment[data-mine] {
+  color: var(--status-approved-text);
+  background: var(--status-approved-bg);
+}
+
+.meta {
+  font-size: var(--text-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* Details on the left, actions and history on the right; one column on narrower windows. */
+.columns {
+  display: grid;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (min-width: 960px) {
+  .columns {
+    grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+  }
+}
+
+.main,
+.side {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.panelTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-size-xl);
+  line-height: 26px;
+}
+
+.limit {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.claimedAmount {
+  font-family: var(--font-heading);
+  font-size: var(--text-size-2xl);
+  color: var(--color-text-brand);
+}
+
+.bar {
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-brand);
+}
+
+.facts .small,
+dd.small {
+  margin: 0;
+  font-weight: var(--font-weight-regular);
+}
+
+.statement,
+.request {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-brand);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  background: var(--color-bg-subtle);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.request {
+  border-left-color: var(--status-more-info-needed-text);
+}
+
+.actions {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.decision {
+  display: grid;
+  gap: var(--space-3);
+  padding-left: var(--space-4);
+  border-left: 4px solid;
+}
+
+.decision[data-outcome='approved'] {
+  border-color: var(--status-approved-text);
+}
+
+.decision[data-outcome='rejected'] {
+  border-color: var(--status-rejected-text);
+}
+
+.outcome {
+  font-family: var(--font-heading);
+  font-size: var(--text-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.decision[data-outcome='approved'] .outcome {
+  color: var(--status-approved-text);
+}
+
+.decision[data-outcome='rejected'] .outcome {
+  color: var(--status-rejected-text);
+}
+
+.reason {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.reason blockquote {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.reason figcaption {
+  font-size: var(--text-size-xs);
+  color: var(--color-text-muted);
+}
+
+.currency {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-brand);
+}

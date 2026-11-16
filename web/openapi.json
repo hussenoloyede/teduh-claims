@@ -501,6 +501,9 @@
             "type" : "string",
             "format" : "date"
           },
+          "policy" : {
+            "$ref" : "#/components/schemas/PolicyFacts"
+          },
           "policyId" : {
             "type" : "string",
             "format" : "uuid"
@@ -527,7 +530,7 @@
             "format" : "int64"
           }
         },
-        "required" : [ "amountClaimed", "claimType", "customerName", "description", "documents", "id", "incidentDate", "policyId", "reference", "status", "submittedAt", "timeline", "version" ]
+        "required" : [ "amountClaimed", "claimType", "customerName", "description", "documents", "id", "incidentDate", "policy", "policyId", "reference", "status", "submittedAt", "timeline", "version" ]
       },
       "ClaimSummary" : {
         "type" : "object",
@@ -683,6 +686,30 @@
           }
         },
         "required" : [ "coverEnd", "coverStart", "customerId", "limits", "planName", "policyId", "policyNumber" ]
+      },
+      "PolicyFacts" : {
+        "type" : "object",
+        "properties" : {
+          "coverEnd" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "coverStart" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "limit" : {
+            "type" : "number",
+            "nullable" : true
+          },
+          "planName" : {
+            "type" : "string"
+          },
+          "policyNumber" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "coverEnd", "coverStart", "planName", "policyNumber" ]
       },
       "RejectRequest" : {
         "type" : "object",

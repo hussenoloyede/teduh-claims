@@ -67,7 +67,7 @@
 /* Label above, value under it, in tinted boxes: the limits and dates on C14, the counts on C15. */
 .facts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: var(--space-2);
   margin: 0;
 }

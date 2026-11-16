@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatDateTime, formatFileSize, formatMoney, todayInMalaysia } from './format';
+import { formatDate, formatDateTime, formatFileSize, formatMoney, formatWaiting, todayInMalaysia } from './format';
 
 describe('formatMoney', () => {
   it('writes RM and two decimals', () => {
@@ -45,5 +45,23 @@ describe('todayInMalaysia', () => {
 
   it('matches the UTC date earlier in the day', () => {
     expect(todayInMalaysia(new Date('2026-11-15T03:00:00Z'))).toBe('2026-11-15');
+  });
+});
+
+describe('formatWaiting', () => {
+  const now = new Date('2026-11-16T12:00:00Z');
+
+  it('says less than an hour for a brand new claim', () => {
+    expect(formatWaiting('2026-11-16T11:30:00Z', now)).toBe('less than an hour');
+  });
+
+  it('counts whole hours under a day', () => {
+    expect(formatWaiting('2026-11-16T11:00:00Z', now)).toBe('1 hour');
+    expect(formatWaiting('2026-11-16T07:00:00Z', now)).toBe('5 hours');
+  });
+
+  it('counts whole days from 24 hours on', () => {
+    expect(formatWaiting('2026-11-15T12:00:00Z', now)).toBe('1 day');
+    expect(formatWaiting('2026-11-13T02:00:00Z', now)).toBe('3 days');
   });
 });

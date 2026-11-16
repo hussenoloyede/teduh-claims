@@ -168,7 +168,8 @@ class ClaimController {
 		people.add(claim.getCustomerId());
 		people.add(claim.getAssignedAgentId());
 		timeline.forEach(event -> people.add(event.getActorId()));
-		return ClaimDetails.of(claim, service.documents(claim.getId()), timeline, names.namesOf(people));
+		return ClaimDetails.of(claim, service.policyOf(claim), service.documents(claim.getId()), timeline,
+				names.namesOf(people));
 	}
 
 	/** Reads each file into memory. Fine at 10 MB a file and 5 files a request, the limits in application.yaml. */

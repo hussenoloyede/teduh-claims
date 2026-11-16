@@ -151,6 +151,13 @@ public class ClaimService {
 		};
 	}
 
+	/** The claim's policy. Asked with the claim's own customer, so it works for an agent's view too. */
+	@Transactional(readOnly = true)
+	public PolicyCover policyOf(Claim claim) {
+		return policies.findForCustomer(claim.getPolicyId(), claim.getCustomerId())
+			.orElseThrow(() -> new IllegalStateException("Claim " + claim.getReference() + " has no policy."));
+	}
+
 	@Transactional(readOnly = true)
 	public Claim find(UUID claimId) {
 		return claims.findById(claimId).orElseThrow(() -> new ClaimNotFoundException(claimId));

@@ -122,6 +122,14 @@ class ClaimApiTest {
 		assertThat(read(page, "$.assignedAgentName")).isEqualTo("Test user");
 		assertThat(strings(page, "$.timeline[*].actorName")).hasSize(5).containsOnly("Test user");
 		assertThat(strings(get("/api/claims", aisyah), "$[*].customerName")).containsOnly("Test user");
+
+		// The policy comes with the claim, so an agent, who can't read /api/policies, still sees the cover and
+		// the limit for this claim's type (baggage delayed: RM 1,000 in TestData).
+		MvcTestResult agentView = get("/api/claims/" + id, farid);
+		assertThat(read(agentView, "$.policy.planName")).isEqualTo("Teduh Travel Plus");
+		assertThat(read(agentView, "$.policy.policyNumber").toString()).startsWith("TT-");
+		assertThat(new BigDecimal(read(agentView, "$.policy.limit").toString())).isEqualByComparingTo("1000");
+		assertThat(read(agentView, "$.policy.coverEnd")).isEqualTo(today.plusDays(60).toString());
 	}
 
 	@Test

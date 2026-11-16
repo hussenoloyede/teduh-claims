@@ -254,6 +254,7 @@ export interface components {
             id: string;
             /** Format: date */
             incidentDate: string;
+            policy: components["schemas"]["PolicyFacts"];
             /** Format: uuid */
             policyId: string;
             reference: string;
@@ -326,6 +327,15 @@ export interface components {
             planName: string;
             /** Format: uuid */
             policyId: string;
+            policyNumber: string;
+        };
+        PolicyFacts: {
+            /** Format: date */
+            coverEnd: string;
+            /** Format: date */
+            coverStart: string;
+            limit?: number | null;
+            planName: string;
             policyNumber: string;
         };
         RejectRequest: {

@@ -60,3 +60,15 @@ const isoDay = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-dig
 export function todayInMalaysia(now: Date = new Date()): string {
   return isoDay.format(now);
 }
+
+/**
+ * How long something has waited, in the largest whole unit: "less than an hour", "5 hours", "1 day",
+ * "3 days". Used for how long a claim has been in the queue.
+ */
+export function formatWaiting(sinceIso: string, now: Date = new Date()): string {
+  const hours = Math.floor((now.getTime() - new Date(sinceIso).getTime()) / 3_600_000);
+  if (hours < 1) return 'less than an hour';
+  if (hours < 24) return hours === 1 ? '1 hour' : `${hours} hours`;
+  const days = Math.floor(hours / 24);
+  return days === 1 ? '1 day' : `${days} days`;
+}

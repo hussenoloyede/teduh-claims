@@ -1,0 +1,98 @@
+.card {
+  overflow-x: auto;
+  border-radius: var(--radius-xl);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-card);
+}
+
+.table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+  font-size: var(--text-size-sm);
+}
+
+.table thead th {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  background: var(--color-bg-subtle);
+}
+
+.table tbody th,
+.table tbody td {
+  padding: var(--space-4);
+  text-align: left;
+  vertical-align: middle;
+  border-top: 1px solid var(--color-border);
+}
+
+.table tbody tr:first-child th,
+.table tbody tr:first-child td {
+  border-top: none;
+}
+
+.reference {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+  color: var(--color-text-brand);
+}
+
+.customer {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-semibold);
+}
+
+.table .number {
+  text-align: right;
+}
+
+.amount {
+  display: block;
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+.claimed {
+  display: block;
+  font-size: var(--text-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.when {
+  white-space: nowrap;
+}
+
+.action {
+  text-align: right;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--color-text-brand);
+  background: var(--color-brand-subtle);
+}
+
+.link[data-first] {
+  color: var(--color-text-on-brand);
+  background: var(--color-brand);
+}
+
+.link:hover {
+  filter: brightness(0.95);
+}

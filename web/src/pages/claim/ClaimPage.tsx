@@ -6,20 +6,17 @@ import { useMe } from '../../api/auth';
 import {
   claimQueryKey,
   claimTypeLabel,
-  downloadDocument,
   myClaimsQueryKey,
   useClaim,
   type ClaimDetails,
 } from '../../api/claims';
 import { api, unwrap } from '../../api/client';
 import { inboxQueryKey } from '../../api/notifications';
-import { usePolicies } from '../../api/policies';
 import { ApiError } from '../../api/problem';
 import { Banner } from '../../components/Banner/Banner';
 import { Button, ButtonLink } from '../../components/Button/Button';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { FileDrop } from '../../components/FileDrop/FileDrop';
-import { FileRow } from '../../components/FileRow/FileRow';
 import { PageError, SectionLoading } from '../../components/PageStatus/PageStatus';
 import { StatusBadge } from '../../components/StatusBadge/StatusBadge';
 import { TextArea } from '../../components/TextArea/TextArea';
@@ -28,6 +25,7 @@ import { formatDate, formatMoney } from '../../lib/format';
 import { queryClient } from '../../queryClient';
 import { checkFile, type PickedFile } from '../newClaim/newClaimForm';
 import page from '../Page.module.css';
+import { ClaimDocuments } from './ClaimDocuments';
 import { latestRequest, timelineItems } from './claimTimeline';
 import styles from './ClaimPage.module.css';
 import { checkResponse, filesAllowed, MAX_NOTE, toResponseFormData } from './respondForm';
@@ -56,8 +54,6 @@ export function ClaimPage() {
 type ClaimViewProps = { claim: ClaimDetails; viewerId: string; justSubmitted: boolean };
 
 function ClaimView({ claim, viewerId, justSubmitted }: ClaimViewProps) {
-  const policies = usePolicies();
-  const policy = policies.data?.find((candidate) => candidate.policyId === claim.policyId);
   const agent = claim.assignedAgentName ?? 'your agent';
   // Set when the customer has just answered a request, so the page says it went through.
   const [sentTo, setSentTo] = useState<string>();
@@ -83,13 +79,8 @@ function ClaimView({ claim, viewerId, justSubmitted }: ClaimViewProps) {
               {claim.reference}
             </h1>
             <p className={styles.plan}>
-              {policy ? (
-                <>
-                  {policy.planName} · <span className={styles.nowrap}>Policy {policy.policyNumber}</span>
-                </>
-              ) : (
-                'Teduh travel policy'
-              )}
+              {claim.policy.planName} ·{' '}
+              <span className={styles.nowrap}>Policy {claim.policy.policyNumber}</span>
             </p>
           </div>
           <StatusBadge status={claim.status} />
@@ -127,7 +118,7 @@ function ClaimView({ claim, viewerId, justSubmitted }: ClaimViewProps) {
         <h2 id="claim-documents" className={styles.sectionTitle}>
           Documents <span className={styles.count}>{claim.documents.length}</span>
         </h2>
-        <Documents claim={claim} />
+        <ClaimDocuments claim={claim} />
       </section>
 
       <section className={page.panel} aria-labelledby="claim-history">
@@ -282,43 +273,6 @@ function MoreInfoNeeded({ claim, agent, onSent }: StatusSectionProps) {
           {`Send to ${agent}`}
         </Button>
       </form>
-    </>
-  );
-}
-
-/** Each document with a Download button. Only one link is fetched at a time, so a button shows it's busy. */
-function Documents({ claim }: { claim: ClaimDetails }) {
-  const [busy, setBusy] = useState<string>();
-  const [failed, setFailed] = useState<string>();
-
-  async function download(documentId: string) {
-    setBusy(documentId);
-    setFailed(undefined);
-    try {
-      await downloadDocument(claim.id, documentId);
-    } catch (error) {
-      setFailed(error instanceof Error ? error.message : 'The download link could not be made.');
-    } finally {
-      setBusy(undefined);
-    }
-  }
-
-  return (
-    <>
-      {failed && <Banner variant="error">{failed}</Banner>}
-      <ul className={page.stack}>
-        {claim.documents.map((document) => (
-          <li key={document.id}>
-            <FileRow
-              fileName={document.fileName}
-              contentType={document.contentType}
-              sizeBytes={document.sizeBytes}
-              busy={busy === document.id}
-              onDownload={() => void download(document.id)}
-            />
-          </li>
-        ))}
-      </ul>
     </>
   );
 }

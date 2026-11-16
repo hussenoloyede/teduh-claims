@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 
 import my.teduh.claims.documents.StoredDocument;
 import my.teduh.claims.policies.ClaimType;
+import my.teduh.claims.policies.PolicyCover;
 
 /**
  * The shapes of the JSON that goes in and out of /api/claims. Records keep them short and immutable.
@@ -71,23 +72,41 @@ public final class ClaimApi {
 
 	}
 
-	/** One claim page: everything about the claim, its documents, and its timeline, oldest first. */
-	public record ClaimDetails(UUID id, String reference, UUID policyId, String customerName, ClaimType claimType,
+	/**
+	 * One claim page: everything about the claim, its policy, its documents, and its timeline, oldest first.
+	 * The policy is here because agents can't read /api/policies, and the review needs the cover and the limit.
+	 */
+	public record ClaimDetails(UUID id, String reference, UUID policyId, PolicyFacts policy, String customerName,
+			ClaimType claimType,
 			LocalDate incidentDate, BigDecimal amountClaimed, String description, ClaimStatus status,
 			@Schema(nullable = true) UUID assignedAgentId, @Schema(nullable = true) String assignedAgentName,
 			@Schema(nullable = true) BigDecimal approvedAmount, @Schema(nullable = true) String decisionReason,
 			Instant submittedAt, long version, List<StoredDocument> documents, List<TimelineEntry> timeline) {
 
 		/** names: display names by person id, from NameLookup, covering the customer, agent and every actor. */
-		static ClaimDetails of(Claim claim, List<StoredDocument> documents, List<ClaimEvent> events,
-				Map<UUID, String> names) {
+		static ClaimDetails of(Claim claim, PolicyCover policy, List<StoredDocument> documents,
+				List<ClaimEvent> events, Map<UUID, String> names) {
 			UUID agent = claim.getAssignedAgentId();
 			return new ClaimDetails(claim.getId(), claim.getReference(), claim.getPolicyId(),
-					nameOf(claim.getCustomerId(), names), claim.getClaimType(), claim.getIncidentDate(),
+					PolicyFacts.of(policy, claim.getClaimType()), nameOf(claim.getCustomerId(), names), claim.getClaimType(), claim.getIncidentDate(),
 					claim.getAmountClaimed(), claim.getDescription(), claim.getStatus(), agent,
 					(agent == null) ? null : nameOf(agent, names), claim.getApprovedAmount(), claim.getDecisionReason(),
 					claim.getSubmittedAt(), claim.getVersion(), documents,
 					events.stream().map(event -> TimelineEntry.of(event, names)).toList());
+		}
+
+	}
+
+	/**
+	 * What a claim page shows about the policy: its number and plan, the cover dates, and the limit for this
+	 * claim's type (null if the policy doesn't cover that type, which the submit rules never let happen).
+	 */
+	public record PolicyFacts(String policyNumber, String planName, LocalDate coverStart, LocalDate coverEnd,
+			@Schema(nullable = true) BigDecimal limit) {
+
+		static PolicyFacts of(PolicyCover policy, ClaimType type) {
+			return new PolicyFacts(policy.policyNumber(), policy.planName(), policy.coverStart(), policy.coverEnd(),
+					policy.limitFor(type).orElse(null));
 		}
 
 	}
