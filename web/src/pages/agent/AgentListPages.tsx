@@ -43,7 +43,15 @@ function ListPage({ title, intro, count, children }: ListPageProps) {
       <div className={page.intro}>
         <h1 className={styles.heading}>
           {title}
-          {count !== undefined && <span className={styles.count}>{count}</span>}
+          {count !== undefined && (
+            <>
+              {/* The badge is for the eye; a screen reader hears "Claims queue, 3 claims" instead of "Claims queue3". */}
+              <span className={styles.count} aria-hidden="true">
+                {count}
+              </span>
+              <span className="visually-hidden">{`, ${count} ${count === 1 ? 'claim' : 'claims'}`}</span>
+            </>
+          )}
         </h1>
         <p>{intro}</p>
       </div>
