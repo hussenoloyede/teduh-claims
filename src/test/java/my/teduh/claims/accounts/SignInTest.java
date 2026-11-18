@@ -11,7 +11,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpSession;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
@@ -29,6 +29,9 @@ class SignInTest {
 	@Autowired
 	private MockMvcTester mvc;
 
+	@Autowired
+	private JdbcTemplate jdbc;
+
 	@Test
 	void withoutSigningInTheApiAnswers401() {
 		MvcTestResult result = mvc.get().uri("/api/auth/me").exchange();
@@ -40,15 +43,40 @@ class SignInTest {
 
 	@Test
 	void signingInStartsASessionThatKnowsWhoYouAre() {
-		MockHttpSession session = signIn("aisyah@example.com", DemoAccounts.PASSWORD);
+		Cookie session = signIn("aisyah@example.com", DemoAccounts.PASSWORD);
 
-		MvcTestResult me = mvc.get().uri("/api/auth/me").session(session).exchange();
+		MvcTestResult me = mvc.get().uri("/api/auth/me").cookie(session).exchange();
 
 		assertThat(me).hasStatus(HttpStatus.OK);
 		assertThat(read(me, "$.id")).isEqualTo(DemoAccounts.AISYAH.toString());
 		assertThat(read(me, "$.displayName")).isEqualTo("Aisyah Rahman");
 		assertThat(read(me, "$.role")).isEqualTo("CUSTOMER");
 		assertThat(body(me)).doesNotContain("password").doesNotContain("bcrypt");
+	}
+
+	/** Checked on the Set-Cookie header itself, exactly as the browser receives it. */
+	@Test
+	void theSessionCookieIsHttpOnlySecureAndSameSiteLax() {
+		MvcTestResult result = attemptSignIn("aisyah@example.com", DemoAccounts.PASSWORD);
+		assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
+
+		String header = sessionCookieHeader(result);
+		assertThat(header).as(header).contains("HttpOnly").contains("Secure").contains("SameSite=Lax");
+	}
+
+	/**
+	 * Sessions are kept in PostgreSQL, so they outlive the app process: Container Apps can stop the app when
+	 * it's idle and start a new one, and the cookie still works. Every request reads the session from the
+	 * table, which this proves the other way round: once the row is gone, the cookie signs nobody in.
+	 */
+	@Test
+	void theSessionLivesInTheDatabase() {
+		Cookie session = signIn("farid@example.com", DemoAccounts.PASSWORD);
+		assertThat(sessionsOf("farid@example.com")).isPositive();
+
+		jdbc.update("delete from spring_session where principal_name = ?", "farid@example.com");
+
+		assertThat(mvc.get().uri("/api/auth/me").cookie(session).exchange()).hasStatus(HttpStatus.UNAUTHORIZED);
 	}
 
 	@Test
@@ -103,21 +131,43 @@ class SignInTest {
 
 	@Test
 	void signingOutEndsTheSession() {
-		MockHttpSession session = signIn("farid@example.com", DemoAccounts.PASSWORD);
+		Cookie session = signIn("daniel@example.com", DemoAccounts.PASSWORD);
+		int before = sessionsOf("daniel@example.com");
 
 		// Signing in cleared the old token, so the app fetches a fresh one first.
-		MvcTestResult signOut = mvc.post().uri("/api/auth/logout").session(session).with(BrowserCsrf.token(mvc)).exchange();
+		MvcTestResult signOut = mvc.post().uri("/api/auth/logout").cookie(session).with(BrowserCsrf.token(mvc)).exchange();
 
 		assertThat(signOut).hasStatus(HttpStatus.NO_CONTENT);
-		assertThat(mvc.get().uri("/api/auth/me").session(session).exchange()).hasStatus(HttpStatus.UNAUTHORIZED);
+		assertThat(mvc.get().uri("/api/auth/me").cookie(session).exchange()).hasStatus(HttpStatus.UNAUTHORIZED);
+		// The session's row is deleted, not just forgotten by this app.
+		assertThat(sessionsOf("daniel@example.com")).isEqualTo(before - 1);
 	}
 
 	// Helpers
 
-	private MockHttpSession signIn(String email, String password) {
+	/** The session cookie the browser would keep and send back, as Spring Session sets it. */
+	private Cookie signIn(String email, String password) {
 		MvcTestResult result = attemptSignIn(email, password);
 		assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
-		return (MockHttpSession) result.getRequest().getSession(false);
+		String header = sessionCookieHeader(result);
+		String value = header.substring("SESSION=".length()).split(";", 2)[0];
+		return new Cookie("SESSION", value);
+	}
+
+	/** The last SESSION cookie the response sets, which is the one a browser keeps. */
+	private static String sessionCookieHeader(MvcTestResult result) {
+		return result.getResponse()
+			.getHeaders("Set-Cookie")
+			.stream()
+			.filter(header -> header.startsWith("SESSION="))
+			.reduce((first, second) -> second)
+			.orElseThrow(() -> new AssertionError("No SESSION cookie in " + result.getResponse().getHeaders("Set-Cookie")));
+	}
+
+	private int sessionsOf(String email) {
+		Integer count = jdbc.queryForObject("select count(*) from spring_session where principal_name = ?",
+				Integer.class, email);
+		return count == null ? 0 : count;
 	}
 
 	private MvcTestResult attemptSignIn(String email, String password) {

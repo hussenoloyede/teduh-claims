@@ -15,6 +15,10 @@ spring:
       # Flyway owns the schema. Hibernate only checks that the entities match the tables,
       # and refuses to start if they don't. It never changes a table itself.
       ddl-auto: validate
+  session:
+    jdbc:
+      # The session tables come from our own Flyway migration (V7), not from Spring Session.
+      initialize-schema: never
   web:
     resources:
       # Spring Boot's own handler for static files is off: WebPages registers one that also answers the
@@ -42,10 +46,11 @@ server:
   forward-headers-strategy: native
   servlet:
     session:
-      # Signed out after 30 minutes without a request.
+      # Signed out after 30 minutes without a request. Sessions are kept in PostgreSQL (Spring Session JDBC),
+      # which reads this timeout and these cookie settings; expired sessions are deleted every minute.
       timeout: 30m
       cookie:
-        # The session cookie: JavaScript can't read it (http-only), it only travels over HTTPS (secure;
+        # The session cookie (named SESSION): JavaScript can't read it (http-only), it only travels over HTTPS (secure;
         # browsers make an exception for http://localhost), and other sites' pages can't make the browser
         # send it with their POSTs (same-site lax).
         http-only: true

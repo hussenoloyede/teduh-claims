@@ -25,7 +25,11 @@ public final class BrowserCsrf {
 			throw new IllegalStateException("/api/auth/csrf sent no XSRF-TOKEN cookie");
 		}
 		return request -> {
-			request.setCookies(cookie);
+			// Added to the request's other cookies (such as SESSION), the way a browser sends them all together.
+			Cookie[] others = request.getCookies();
+			Cookie[] all = (others == null) ? new Cookie[1] : java.util.Arrays.copyOf(others, others.length + 1);
+			all[all.length - 1] = cookie;
+			request.setCookies(all);
 			request.addHeader("X-XSRF-TOKEN", cookie.getValue());
 			return request;
 		};

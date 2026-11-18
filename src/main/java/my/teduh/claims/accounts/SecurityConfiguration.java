@@ -68,7 +68,8 @@ class SecurityConfiguration {
 			.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
 
 			.logout(logout -> logout.logoutUrl("/api/auth/logout")
-				.deleteCookies("JSESSIONID")
+				// Spring Session names its cookie SESSION (the servlet container's own was JSESSIONID).
+				.deleteCookies("SESSION")
 				.logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.NO_CONTENT)))
 
 			// Problem details instead of redirects to a login page, which an API caller can't use.
