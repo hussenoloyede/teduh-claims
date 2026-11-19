@@ -38,7 +38,6 @@
 .quote {
   margin: 0;
   padding: var(--space-3) var(--space-4);
-  border-left: 3px solid var(--color-brand);
   border-radius: var(--radius-md);
   color: var(--color-text-muted);
   background: var(--color-bg-subtle);
@@ -92,18 +91,9 @@
   display: grid;
   gap: var(--space-3);
   padding: var(--space-5);
-  border-left: 4px solid;
   border-radius: var(--radius-xl);
   background: var(--color-bg);
   box-shadow: var(--shadow-card);
-}
-
-.decision[data-outcome='approved'] {
-  border-color: var(--status-approved-text);
-}
-
-.decision[data-outcome='rejected'] {
-  border-color: var(--status-rejected-text);
 }
 
 .decision h2 {
