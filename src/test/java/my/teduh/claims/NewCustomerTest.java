@@ -54,7 +54,8 @@ class NewCustomerTest {
 
 		MvcTestResult plans = mvc.get().uri("/api/plans").cookie(session).exchange();
 		assertThat(plans).hasStatus(HttpStatus.OK);
-		assertThat((List<?>) read(plans, "$[*].plan")).containsExactly("ESSENTIAL", "PLUS", "MAX");
+		List<String> planIds = JsonPath.read(body(plans), "$[*].plan");
+		assertThat(planIds).containsExactly("ESSENTIAL", "PLUS", "MAX");
 		assertThat(read(plans, "$[1].name")).isEqualTo("Teduh Travel Plus");
 		assertThat(((Number) read(plans, "$[1].pricePerTrip")).doubleValue()).isEqualTo(49.0);
 		assertThat(((Number) read(plans, "$[1].limits.BAGGAGE_DELAYED")).doubleValue()).isEqualTo(1000.0);
