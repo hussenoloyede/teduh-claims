@@ -93,7 +93,7 @@ class DemoResetTest {
 			.isEqualTo(today.plusDays(50));
 	}
 
-	private Cookie newCustomerWithAClaim() {
+	private Cookie newCustomerWithAClaim() throws Exception {
 		MvcTestResult created = mvc.post().uri("/api/auth/new-customer").with(BrowserCsrf.token(mvc)).exchange();
 		assertThat(created).hasStatus(HttpStatus.NO_CONTENT);
 		String header = created.getResponse()

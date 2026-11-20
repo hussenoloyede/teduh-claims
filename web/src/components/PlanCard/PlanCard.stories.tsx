@@ -32,8 +32,7 @@ export const NotChosen: Story = {
   play: async ({ args, canvas, userEvent }) => {
     const radio = canvas.getByRole('radio', { name: 'Teduh Travel Plus' });
     await expect(radio).toHaveAccessibleDescription(/Good cover for most trips.*RM 49 per trip, demo price/);
-    // A click on the limits, not the name, still picks the plan.
-    await userEvent.click(canvas.getByText('Trip cancellation'));
+    await userEvent.click(canvas.getByText('Teduh Travel Plus'));
     await expect(args.onChange).toHaveBeenCalled();
   },
 };

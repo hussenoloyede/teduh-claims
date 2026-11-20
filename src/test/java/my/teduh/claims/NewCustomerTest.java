@@ -67,7 +67,7 @@ class NewCustomerTest {
 
 		// The same trip twice would be two policies for the same days.
 		MvcTestResult again = buy(session, "MAX", today.plusDays(5), today.plusDays(20));
-		assertThat(again).hasStatus(HttpStatus.UNPROCESSABLE_ENTITY);
+		assertThat(again).hasStatus(422);
 		assertThat(read(again, "$.detail")).isEqualTo("You already have cover for some of those dates.");
 
 		// Cover starts today, so a claim for today is inside it.
