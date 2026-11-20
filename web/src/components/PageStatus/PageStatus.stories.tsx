@@ -11,8 +11,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Loading: Story = {
+  parameters: { layout: 'fullscreen' },
   play: async ({ canvas }) => {
     await expect(canvas.getByRole('status')).toHaveTextContent('Loading Teduh');
+    // After two seconds without an answer, the splash says the server may be asleep.
+    await expect(
+      await canvas.findByText('Waking the demo server. The first visit can take a minute.', {}, { timeout: 4000 }),
+    ).toBeVisible();
   },
 };
 

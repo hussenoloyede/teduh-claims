@@ -48,3 +48,69 @@
   border-radius: var(--radius-full);
   animation: spin 900ms linear infinite;
 }
+
+/* S01: the whole screen in the brand colour, the name in the middle and the progress at the bottom. */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+  color: var(--color-text-on-brand);
+  background: var(--color-brand);
+}
+
+.brand {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: var(--space-2);
+}
+
+.logo {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-xl);
+  color: var(--color-text-brand);
+  background: var(--color-bg);
+}
+
+.name {
+  font-family: var(--font-heading);
+  font-size: var(--text-size-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 36px;
+}
+
+.waiting {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.splashSpinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgb(255 255 255 / 0.3);
+  border-top-color: var(--color-text-on-brand);
+  border-radius: var(--radius-full);
+  animation: spin 900ms linear infinite;
+}
+
+.fictional {
+  font-size: var(--text-size-xs);
+  opacity: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splashSpinner {
+    animation-duration: 3s;
+  }
+}

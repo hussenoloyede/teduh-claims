@@ -5,10 +5,12 @@ import type { components } from './schema';
 
 export type Policy = components['schemas']['PolicyCover'];
 
-/** The signed-in customer's policies with their limits. They don't change during a visit. */
+export const policiesQueryKey = ['policies'] as const;
+
+/** The signed-in customer's policies with their limits. They only change when the customer buys a plan. */
 export function usePolicies() {
   return useQuery({
-    queryKey: ['policies'],
+    queryKey: policiesQueryKey,
     queryFn: () => unwrap(api.GET('/api/policies')),
     staleTime: Infinity,
   });

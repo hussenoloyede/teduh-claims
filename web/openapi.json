@@ -38,6 +38,17 @@
         "tags" : [ "auth-controller" ]
       }
     },
+    "/api/auth/new-customer" : {
+      "post" : {
+        "operationId" : "newCustomer",
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "tags" : [ "auth-controller" ]
+      }
+    },
     "/api/claims" : {
       "get" : {
         "operationId" : "list",
@@ -413,6 +424,27 @@
         "tags" : [ "notification-controller" ]
       }
     },
+    "/api/plans" : {
+      "get" : {
+        "operationId" : "plans",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/PlanOffer"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "policy-controller" ]
+      }
+    },
     "/api/policies" : {
       "get" : {
         "operationId" : "mine",
@@ -429,6 +461,32 @@
               }
             },
             "description" : "OK"
+          }
+        },
+        "tags" : [ "policy-controller" ]
+      },
+      "post" : {
+        "operationId" : "buy",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BuyPolicyRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PolicyCover"
+                }
+              }
+            },
+            "description" : "The new policy"
           }
         },
         "tags" : [ "policy-controller" ]
@@ -453,6 +511,24 @@
           }
         },
         "required" : [ "amount", "version" ]
+      },
+      "BuyPolicyRequest" : {
+        "type" : "object",
+        "properties" : {
+          "coverEnd" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "coverStart" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "plan" : {
+            "type" : "string",
+            "enum" : [ "ESSENTIAL", "PLUS", "MAX" ]
+          }
+        },
+        "required" : [ "coverEnd", "coverStart", "plan" ]
       },
       "ClaimDetails" : {
         "type" : "object",
@@ -652,6 +728,31 @@
           }
         },
         "required" : [ "displayName", "email", "id", "role" ]
+      },
+      "PlanOffer" : {
+        "type" : "object",
+        "properties" : {
+          "blurb" : {
+            "type" : "string"
+          },
+          "limits" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "number"
+            }
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "plan" : {
+            "type" : "string",
+            "enum" : [ "ESSENTIAL", "PLUS", "MAX" ]
+          },
+          "pricePerTrip" : {
+            "type" : "number"
+          }
+        },
+        "required" : [ "blurb", "limits", "name", "plan", "pricePerTrip" ]
       },
       "PolicyCover" : {
         "type" : "object",

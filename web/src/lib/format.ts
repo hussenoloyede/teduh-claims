@@ -14,6 +14,16 @@ export function formatMoney(amount: number): string {
   return `RM ${money.format(amount)}`;
 }
 
+const wholeMoney = new Intl.NumberFormat('en-MY', { maximumFractionDigits: 0 });
+
+/**
+ * 1500 → "RM 1,500", for prices and plan limits, which are always whole ringgit. Anything with sen falls
+ * back to formatMoney, so an amount is never rounded on screen.
+ */
+export function formatPlanMoney(amount: number): string {
+  return Number.isInteger(amount) ? `RM ${wholeMoney.format(amount)}` : formatMoney(amount);
+}
+
 const date = new Intl.DateTimeFormat('en-GB', {
   day: 'numeric',
   month: 'short',

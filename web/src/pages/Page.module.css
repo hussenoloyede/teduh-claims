@@ -123,3 +123,36 @@
   justify-content: space-between;
   gap: var(--space-3);
 }
+
+/* A whole-card link with an icon, two lines of text and an arrow: "New to Teduh?" on C20. */
+.linkCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  color: var(--color-text);
+  text-decoration: none;
+  background: var(--color-bg);
+  box-shadow: var(--shadow-card);
+}
+
+.linkCard:hover {
+  background: var(--color-bg-subtle);
+}
+
+.linkCard > svg {
+  flex: none;
+  color: var(--color-text-brand);
+}
+
+.linkCard > span {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+}
+
+.linkCard > span span {
+  font-size: var(--text-size-sm);
+  color: var(--color-text-muted);
+}

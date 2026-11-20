@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatDateTime, formatFileSize, formatMoney, formatWaiting, todayInMalaysia } from './format';
+import { formatDate, formatDateTime, formatFileSize, formatMoney, formatPlanMoney, formatWaiting, todayInMalaysia } from './format';
 
 describe('formatMoney', () => {
   it('writes RM and two decimals', () => {
@@ -63,5 +63,16 @@ describe('formatWaiting', () => {
   it('counts whole days from 24 hours on', () => {
     expect(formatWaiting('2026-11-15T12:00:00Z', now)).toBe('1 day');
     expect(formatWaiting('2026-11-13T02:00:00Z', now)).toBe('3 days');
+  });
+});
+
+describe('formatPlanMoney', () => {
+  it('leaves out the sen on whole ringgit', () => {
+    expect(formatPlanMoney(49)).toBe('RM 49');
+    expect(formatPlanMoney(10000)).toBe('RM 10,000');
+  });
+
+  it('keeps the sen when there are any', () => {
+    expect(formatPlanMoney(49.5)).toBe('RM 49.50');
   });
 });

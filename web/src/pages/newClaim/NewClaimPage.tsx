@@ -8,7 +8,7 @@ import { api, unwrap } from '../../api/client';
 import { inboxQueryKey } from '../../api/notifications';
 import { coverState, limitsOf, usePolicies, type Policy } from '../../api/policies';
 import { Banner } from '../../components/Banner/Banner';
-import { Button } from '../../components/Button/Button';
+import { Button, ButtonLink } from '../../components/Button/Button';
 import { ChoiceCard } from '../../components/ChoiceCard/ChoiceCard';
 import { ErrorSummary, type SummaryError } from '../../components/ErrorSummary/ErrorSummary';
 import { FileDrop } from '../../components/FileDrop/FileDrop';
@@ -177,6 +177,9 @@ export function NewClaimPage() {
         <title>New claim · Teduh Claims</title>
         <h1>New claim</h1>
         <p className={page.quiet}>You need a Teduh policy to make a claim.</p>
+        <ButtonLink to="/plans" fullWidth>
+          Choose a plan
+        </ButtonLink>
       </div>
     );
   }

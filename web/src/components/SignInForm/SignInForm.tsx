@@ -1,24 +1,27 @@
-import { ArrowRight, Eye, EyeOff, Headset, Info, LockKeyhole, Mail, Umbrella, UserRound } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Headset, Info, LockKeyhole, Mail, Umbrella, UserPlus, UserRound } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { demoAccounts, DEMO_PASSWORD, type DemoRole } from '../../api/auth';
 import { Button } from '../Button/Button';
 import { TextField } from '../TextField/TextField';
 import styles from './SignInForm.module.css';
 
-/** Which button is waiting for the server: one of the demo buttons, or the form's Sign in. */
-export type SignInPending = DemoRole | 'form';
+/** Which button is waiting for the server: a demo account, a new customer, or the form's Sign in. */
+export type SignInPending = DemoRole | 'new' | 'form';
 
 type SignInFormProps = {
   onDemo: (role: DemoRole) => void;
+  /** "Try as a new customer": a fresh account with no policy. */
+  onNewCustomer: () => void;
   onSubmit: (email: string, password: string) => void;
   pending?: SignInPending;
   /** The server's answer when signing in failed. */
   error?: string;
 };
 
-// C01 and A01 in Hi-Fi 2.0, as one screen for both roles. The design's Remember me, Forgot password,
-// security badges and shortcut cards are left out: the app has none of those behind them.
-export function SignInForm({ onDemo, onSubmit, pending, error }: SignInFormProps) {
+// C01 and A01 in Hi-Fi 2.0, as one screen for both roles, with the demo card from C01b. The design's
+// Remember me, Forgot password, security badges and shortcut cards are left out: the app has none of those
+// behind them.
+export function SignInForm({ onDemo, onNewCustomer, onSubmit, pending, error }: SignInFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const busy = pending !== undefined;
 
@@ -44,15 +47,32 @@ export function SignInForm({ onDemo, onSubmit, pending, error }: SignInFormProps
         </h2>
         <div className={styles.demoButtons}>
           <DemoButton
-            role="customer"
-            label="Try as customer"
-            icon={<UserRound size={16} />}
-            pending={pending}
-            onDemo={onDemo}
+            label="Try as a new customer"
+            detail="Start from scratch: choose a plan, then claim"
+            icon={<UserPlus size={18} />}
+            waiting={pending === 'new'}
+            busy={busy}
+            onClick={onNewCustomer}
+            primary
           />
-          <DemoButton role="agent" label="Try as agent" icon={<Headset size={16} />} pending={pending} onDemo={onDemo} />
+          <DemoButton
+            label={`Try as customer ${demoAccounts.customer.name}`}
+            detail="Has a policy and claims already"
+            icon={<UserRound size={18} />}
+            waiting={pending === 'customer'}
+            busy={busy}
+            onClick={() => onDemo('customer')}
+          />
+          <DemoButton
+            label={`Try as agent ${demoAccounts.agent.name}`}
+            detail="Review and decide claims"
+            icon={<Headset size={18} />}
+            waiting={pending === 'agent'}
+            busy={busy}
+            onClick={() => onDemo('agent')}
+          />
         </div>
-        <p className={styles.note}>Signs in to a demo account. Every claim and policy in it is made up.</p>
+        <p className={styles.note}>Each one signs in to a demo account. Every claim and policy in it is made up.</p>
       </section>
 
       <p className={styles.divider}>
@@ -108,28 +128,34 @@ export function SignInForm({ onDemo, onSubmit, pending, error }: SignInFormProps
 }
 
 type DemoButtonProps = {
-  role: DemoRole;
   label: string;
+  detail: string;
   icon: ReactNode;
-  pending?: SignInPending;
-  onDemo: (role: DemoRole) => void;
+  /** This button's request is the one in flight. */
+  waiting: boolean;
+  /** Any sign-in is in flight, so no other button can start one. */
+  busy: boolean;
+  onClick: () => void;
+  /** Drawn in the brand colour: the first thing a new visitor should try. */
+  primary?: boolean;
 };
 
-function DemoButton({ role, label, icon, pending, onDemo }: DemoButtonProps) {
-  const waiting = pending === role;
+function DemoButton({ label, detail, icon, waiting, busy, onClick, primary = false }: DemoButtonProps) {
   return (
     <button
       type="button"
-      className={styles.demo}
-      onClick={() => onDemo(role)}
-      disabled={pending !== undefined}
+      className={[styles.demo, primary && styles.demoPrimary].filter(Boolean).join(' ')}
+      onClick={onClick}
+      disabled={busy}
       aria-busy={waiting || undefined}
     >
-      <span className={styles.demoLabel}>
-        <span aria-hidden="true">{icon}</span>
-        {waiting ? 'Signing in…' : label}
+      <span className={styles.demoIcon} aria-hidden="true">
+        {icon}
       </span>
-      <span className={styles.demoWho}>{demoAccounts[role].name}</span>
+      <span className={styles.demoText}>
+        <span className={styles.demoLabel}>{waiting ? 'Signing in…' : label}</span>
+        <span className={styles.demoWho}>{detail}</span>
+      </span>
     </button>
   );
 }

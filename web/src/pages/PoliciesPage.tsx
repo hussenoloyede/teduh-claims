@@ -1,4 +1,7 @@
+import { Plus, ShieldCheck } from 'lucide-react';
 import { coverState, limitsOf, usePolicies, type CoverState } from '../api/policies';
+import { ButtonLink } from '../components/Button/Button';
+import { EmptyState } from '../components/EmptyState/EmptyState';
 import { PageError, SectionLoading } from '../components/PageStatus/PageStatus';
 import { PolicyCard } from '../components/PolicyCard/PolicyCard';
 import { formatDate, formatMoney, todayInMalaysia } from '../lib/format';
@@ -10,7 +13,8 @@ const stateText: Record<CoverState, string> = {
   ended: 'Has ended',
 };
 
-// C14: each policy with its limit per claim type and its cover dates, all from /api/policies.
+// C14: each policy with its limit per claim type and its cover dates, all from /api/policies. A customer
+// can cover another trip from here, as long as its dates don't overlap a policy they already have.
 export function PoliciesPage() {
   const policies = usePolicies();
   const today = todayInMalaysia();
@@ -25,7 +29,19 @@ export function PoliciesPage() {
 
       {policies.isPending && <SectionLoading label="Loading your policies…" />}
       {policies.isError && <PageError message={policies.error.message} onRetry={() => void policies.refetch()} />}
-      {policies.data?.length === 0 && <p className={styles.quiet}>You have no Teduh policies.</p>}
+      {policies.data?.length === 0 && (
+        <EmptyState
+          icon={<ShieldCheck size={28} />}
+          title="You don't have a policy yet"
+          action={
+            <ButtonLink to="/plans" fullWidth>
+              Choose a plan
+            </ButtonLink>
+          }
+        >
+          Choose a plan for your trip. Once you are covered, you can claim if something goes wrong.
+        </EmptyState>
+      )}
 
       {policies.data?.map((policy) => {
         const state = coverState(policy, today);
@@ -75,6 +91,12 @@ export function PoliciesPage() {
           </section>
         );
       })}
+
+      {policies.data && policies.data.length > 0 && (
+        <ButtonLink to="/plans" variant="secondary" fullWidth icon={<Plus size={18} aria-hidden="true" />}>
+          Cover another trip
+        </ButtonLink>
+      )}
     </div>
   );
 }

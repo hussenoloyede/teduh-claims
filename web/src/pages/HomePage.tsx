@@ -1,4 +1,5 @@
-import { FileText, Lightbulb, Plus } from 'lucide-react';
+import { ChevronRight, CircleHelp, FileText, Lightbulb, Plus, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router';
 import { useMe } from '../api/auth';
 import { isDecided, useMyClaims } from '../api/claims';
 import { coverState, limitsOf, planNames, usePolicies } from '../api/policies';
@@ -11,7 +12,8 @@ import { todayInMalaysia } from '../lib/format';
 import { ClaimCardList } from './claimCards';
 import styles from './Page.module.css';
 
-// C02. Left out although the design shows them: the emergency hotline (Teduh has none), and the promise of
+// C02, and C20 for a new customer who has no policy yet: then the page offers the plans instead of a
+// claim, since a claim needs a policy. Left out although the design shows them: the emergency hotline (Teduh has none), and the promise of
 // payment "in 2 to 3 working days via DuitNow" (the app makes no payments).
 export function HomePage() {
   const me = useMe();
@@ -22,6 +24,7 @@ export function HomePage() {
   const firstName = me.data?.displayName.split(' ')[0];
   const activeCount = policies.data?.filter((policy) => coverState(policy, today) === 'active').length ?? 0;
   const openCount = claims.data?.filter((claim) => !isDecided(claim.status)).length ?? 0;
+  const noPolicy = policies.data?.length === 0;
 
   return (
     <div className={styles.page}>
@@ -35,9 +38,22 @@ export function HomePage() {
         <SectionHeader
           id="home-policies"
           title="Your policies"
-          badge={policies.data ? `${activeCount} active` : undefined}
-          link={{ to: '/policies', label: 'View all' }}
+          badge={policies.data && !noPolicy ? `${activeCount} active` : undefined}
+          link={noPolicy ? undefined : { to: '/policies', label: 'View all' }}
         />
+        {noPolicy && (
+          <EmptyState
+            icon={<ShieldCheck size={28} />}
+            title="You don't have a policy yet"
+            action={
+              <ButtonLink to="/plans" fullWidth>
+                Choose a plan
+              </ButtonLink>
+            }
+          >
+            Choose a plan for your trip. Once you are covered, you can claim if something goes wrong.
+          </EmptyState>
+        )}
         {policies.isPending && <SectionLoading label="Loading your policies…" />}
         {policies.isError && <PageError message={policies.error.message} onRetry={() => void policies.refetch()} />}
         {policies.data?.map((policy) => (
@@ -63,7 +79,12 @@ export function HomePage() {
         />
         {claims.isPending && <SectionLoading label="Loading your claims…" />}
         {claims.isError && <PageError message={claims.error.message} onRetry={() => void claims.refetch()} />}
-        {claims.data?.length === 0 && (
+        {claims.data?.length === 0 && noPolicy && (
+          <EmptyState icon={<FileText size={28} />} title="No claims yet">
+            After you have a policy, your claims show here.
+          </EmptyState>
+        )}
+        {claims.data?.length === 0 && !noPolicy && (
           <EmptyState icon={<FileText size={28} />} title="You haven't made a claim yet">
             If something went wrong on your trip, start a claim and attach your receipts.
           </EmptyState>
@@ -73,9 +94,20 @@ export function HomePage() {
         )}
       </section>
 
-      <ButtonLink to="/claims/new" fullWidth icon={<Plus size={18} aria-hidden="true" />}>
-        Start a claim
-      </ButtonLink>
+      {noPolicy ? (
+        <Link to="/help" className={styles.linkCard}>
+          <CircleHelp size={20} aria-hidden="true" />
+          <span>
+            <strong>New to Teduh?</strong>
+            <span>What a plan covers and how claims work</span>
+          </span>
+          <ChevronRight size={20} aria-hidden="true" />
+        </Link>
+      ) : (
+        <ButtonLink to="/claims/new" fullWidth icon={<Plus size={18} aria-hidden="true" />}>
+          Start a claim
+        </ButtonLink>
+      )}
 
       <aside className={styles.tip} aria-label="Tip">
         <Lightbulb size={20} aria-hidden="true" />

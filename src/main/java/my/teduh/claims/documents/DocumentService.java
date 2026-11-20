@@ -8,6 +8,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Stores files in Blob Storage first and records them in the database second, inside the caller's
@@ -65,6 +67,23 @@ class DocumentService implements DocumentStore {
 	public Optional<DownloadLink> linkFor(UUID claimId, UUID documentId) {
 		return documents.findByIdAndClaimId(documentId, claimId)
 			.map(document -> storage.link(document.getBlobName(), document.getFileName()));
+	}
+
+	@Override
+	@Transactional
+	public int deleteAll() {
+		List<String> files = documents.findAll().stream().map(Document::getBlobName).toList();
+		documents.deleteAllInBatch();
+		// The files go only once the rows are really gone. Deleting them first could leave rows that point at
+		// missing files if the transaction then rolled back; this way the worst case is a leftover file in the
+		// private container that nothing links to.
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				files.forEach(storage::delete);
+			}
+		});
+		return files.size();
 	}
 
 }

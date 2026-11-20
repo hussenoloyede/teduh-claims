@@ -1,0 +1,109 @@
+.card {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 2px solid transparent;
+  border-radius: var(--radius-xl);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-card);
+}
+
+.card:has(.input:checked) {
+  border-color: var(--color-brand);
+}
+
+.card:has(.input:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+
+/* The label covers the whole card, so the blurb and limits are clickable too. */
+.top::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+/* The radio is drawn as the tick; it stays in the page for the keyboard and screen readers. */
+.input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.name {
+  font-family: var(--font-heading);
+  font-size: var(--text-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.tick {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--color-border-field);
+  border-radius: var(--radius-full);
+  color: transparent;
+}
+
+.card:has(.input:checked) .tick {
+  border-color: var(--color-brand);
+  color: var(--color-text-on-brand);
+  background: var(--color-brand);
+}
+
+.blurb {
+  font-size: var(--text-size-sm);
+  color: var(--color-text-muted);
+}
+
+.price {
+  font-size: var(--text-size-xs);
+  color: var(--color-text-muted);
+}
+
+.amount {
+  margin-right: var(--space-1);
+  font-family: var(--font-heading);
+  font-size: var(--text-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.limits {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-1) 0 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-size-sm);
+  background: var(--color-bg-subtle);
+}
+
+.limits div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.limits dt {
+  color: var(--color-text-muted);
+}
+
+.limits dd {
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+}

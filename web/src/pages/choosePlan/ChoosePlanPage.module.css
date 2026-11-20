@@ -1,0 +1,198 @@
+.top {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  justify-self: start;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-brand);
+  text-decoration: none;
+}
+
+.back:hover {
+  text-decoration: underline;
+}
+
+.form {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.group {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.group legend {
+  padding: 0;
+  margin-bottom: var(--space-3);
+}
+
+.intro {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.intro h1 {
+  font-size: var(--text-size-3xl);
+  line-height: 32px;
+}
+
+.intro p,
+.intro span {
+  color: var(--color-text-muted);
+}
+
+h1[tabindex='-1']:focus {
+  outline: none;
+}
+
+/* "14 days of cover" under the dates. Empty, and taking no space, while the dates aren't valid. */
+.summary {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-brand);
+}
+
+.summary:not(:empty) {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-brand-subtle);
+}
+
+.summary svg {
+  flex: none;
+}
+
+.summary p {
+  display: grid;
+  gap: 2px;
+}
+
+.summary span {
+  font-size: var(--text-size-sm);
+  color: var(--color-text);
+}
+
+.overline {
+  font-family: var(--font-body);
+  font-size: var(--text-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* Label on the left, value on the right. */
+.rows {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.rows div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.rows dt {
+  color: var(--color-text-muted);
+}
+
+.rows dd {
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+  text-align: right;
+}
+
+.price {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.price p:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.price span {
+  font-size: var(--text-size-xs);
+  color: var(--color-text-muted);
+}
+
+.amount {
+  font-family: var(--font-heading);
+  font-size: var(--text-size-2xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+}
+
+.confirm input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--color-brand);
+}
+
+.error {
+  font-size: var(--text-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-danger);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.forward {
+  flex: 1;
+}
+
+.done {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.done h1 {
+  font-size: var(--text-size-3xl);
+  line-height: 32px;
+}
+
+.done p {
+  color: var(--color-text-muted);
+}
+
+.doneIcon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  color: var(--color-success);
+  background: var(--status-approved-bg);
+}

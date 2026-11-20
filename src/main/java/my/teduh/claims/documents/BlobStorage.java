@@ -65,6 +65,11 @@ class BlobStorage {
 		container.getBlobClient(blobName).uploadWithResponse(options, null, Context.NONE);
 	}
 
+	/** Removes a file. Only the daily demo reset does this; a claim's documents are otherwise kept. */
+	void delete(String blobName) {
+		container.getBlobClient(blobName).deleteIfExists();
+	}
+
 	/**
 	 * A SAS (shared access signature) link: the file's address plus a signed query string allowing one
 	 * thing, reading this one file, until it expires. "attachment" makes the browser download the file

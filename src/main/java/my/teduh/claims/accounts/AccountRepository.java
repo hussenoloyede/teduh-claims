@@ -10,6 +10,8 @@ interface AccountRepository extends JpaRepository<Account, UUID> {
 	/** Spring Data writes this query from the method name: select ... from users where email = ? */
 	Optional<Account> findByEmail(String email);
 
+	long countByEmailStartingWith(String prefix);
+
 	/** What sign-in will call: the email as the person typed it, spaces and capitals included. */
 	default Optional<Account> findByEmailAsTyped(String email) {
 		return findByEmail(Account.normalise(email));

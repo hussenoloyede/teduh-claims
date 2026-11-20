@@ -8,6 +8,7 @@ import {
   landingAfterSignIn,
   meQueryKey,
   signIn,
+  startAsNewCustomer,
   useMe,
   type DemoRole,
 } from '../api/auth';
@@ -21,6 +22,7 @@ type Credentials = { email: string; password: string; via: SignInPending };
 
 // /sign-in. The demo buttons and the form both make a real sign-in to Spring Security. Afterwards the app
 // asks who signed in and goes to that person's start page, or back to the page that sent them here.
+// "Try as a new customer" makes a fresh account instead, and starts at the welcome screens.
 export function SignInPage() {
   const me = useMe();
   const navigate = useNavigate();
@@ -42,9 +44,20 @@ export function SignInPage() {
     onSettled: () => setVia(undefined),
   });
 
+  const newCustomer = useMutation({
+    mutationFn: startAsNewCustomer,
+    onMutate: () => setVia('new'),
+    onSuccess: async () => {
+      queryClient.clear();
+      await queryClient.fetchQuery({ queryKey: meQueryKey, queryFn: fetchMe });
+      void navigate('/welcome', { replace: true });
+    },
+    onSettled: () => setVia(undefined),
+  });
+
   if (me.isPending) return <PageLoading />;
   // Already signed in (for example after pressing Back): go where they belong.
-  if (me.data && !signInMutation.isPending) {
+  if (me.data && !signInMutation.isPending && !newCustomer.isPending) {
     return <Navigate to={landingAfterSignIn(me.data.role, from)} replace />;
   }
 
@@ -58,9 +71,10 @@ export function SignInPage() {
       <main className={styles.main}>
         <SignInForm
           onDemo={demo}
+          onNewCustomer={() => newCustomer.mutate()}
           onSubmit={(email, password) => signInMutation.mutate({ email, password, via: 'form' })}
           pending={via}
-          error={signInMutation.error?.message}
+          error={signInMutation.error?.message ?? newCustomer.error?.message}
         />
       </main>
       <Footer />

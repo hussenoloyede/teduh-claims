@@ -7,8 +7,8 @@ import type { CustomerSection } from '../components/BottomNav/BottomNav';
 export function sectionOf(pathname: string): CustomerSection | undefined {
   if (pathname === '/') return 'home';
   if (pathname.startsWith('/claims')) return 'claims';
-  if (pathname.startsWith('/policies')) return 'policies';
-  if (pathname.startsWith('/profile')) return 'profile';
+  if (pathname.startsWith('/policies') || pathname.startsWith('/plans')) return 'policies';
+  if (pathname.startsWith('/profile') || pathname.startsWith('/help')) return 'profile';
   return undefined;
 }
 

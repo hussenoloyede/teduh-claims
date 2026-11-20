@@ -31,7 +31,7 @@ class SecurityConfiguration {
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(requests -> requests
-			.requestMatchers("/api/auth/login", "/api/auth/csrf").permitAll()
+			.requestMatchers("/api/auth/login", "/api/auth/csrf", "/api/auth/new-customer").permitAll()
 			.requestMatchers("/actuator/health/**").permitAll()
 			.requestMatchers("/actuator/**").denyAll()
 			.requestMatchers("/api/**").authenticated()

@@ -10,6 +10,11 @@ describe('sectionOf', () => {
     expect(sectionOf('/profile')).toBe('profile');
   });
 
+  it('puts choosing a plan under Policies and help under Profile', () => {
+    expect(sectionOf('/plans')).toBe('policies');
+    expect(sectionOf('/help')).toBe('profile');
+  });
+
   it('marks no tab on pages outside the four', () => {
     expect(sectionOf('/notifications')).toBeUndefined();
   });

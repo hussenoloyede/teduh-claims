@@ -31,11 +31,8 @@ class DemoPolicySeeder implements ApplicationRunner {
 
 	static final UUID DANIELS_POLICY = UUID.fromString("7ed00000-0000-4000-8000-000000000102");
 
-	/** The limits per claim type from the scope. */
-	static final Map<ClaimType, BigDecimal> TRAVEL_PLUS_LIMITS = Map.of(ClaimType.FLIGHT_DELAY,
-			new BigDecimal("500.00"), ClaimType.BAGGAGE_DELAYED, new BigDecimal("1000.00"),
-			ClaimType.LOST_OR_DAMAGED_BAGGAGE, new BigDecimal("3000.00"), ClaimType.TRIP_CANCELLATION,
-			new BigDecimal("10000.00"));
+	/** The limits per claim type from the scope, the same as a Teduh Travel Plus bought in the app. */
+	static final Map<ClaimType, BigDecimal> TRAVEL_PLUS_LIMITS = TravelPlan.PLUS.limits();
 
 	private final PolicyRepository policies;
 

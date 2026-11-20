@@ -5,7 +5,7 @@ import { SignInForm } from './SignInForm';
 const meta = {
   title: 'Screens/SignInForm',
   component: SignInForm,
-  args: { onDemo: fn(), onSubmit: fn() },
+  args: { onDemo: fn(), onNewCustomer: fn(), onSubmit: fn() },
   parameters: { layout: 'fullscreen' },
 } satisfies Meta<typeof SignInForm>;
 
@@ -25,6 +25,8 @@ export const DemoButtons: Story = {
   play: async ({ args, canvas, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: /Try as agent/ }));
     await expect(args.onDemo).toHaveBeenCalledWith('agent');
+    await userEvent.click(canvas.getByRole('button', { name: /Try as a new customer/ }));
+    await expect(args.onNewCustomer).toHaveBeenCalledOnce();
   },
 };
 

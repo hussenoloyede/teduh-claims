@@ -28,4 +28,10 @@ public interface DocumentStore {
 	/** Empty when the document doesn't exist or belongs to another claim. */
 	Optional<DownloadLink> linkFor(UUID claimId, UUID documentId);
 
+	/**
+	 * For the daily demo reset only: deletes every stored file and every document row. Returns how many
+	 * there were.
+	 */
+	int deleteAll();
+
 }

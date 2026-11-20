@@ -1,4 +1,5 @@
-import { LogOut } from 'lucide-react';
+import { ChevronRight, CircleHelp, LogOut } from 'lucide-react';
+import { Link } from 'react-router';
 import { useMe } from '../api/auth';
 import { useMyClaims } from '../api/claims';
 import { coverState, usePolicies } from '../api/policies';
@@ -48,6 +49,14 @@ export function ProfilePage() {
           </div>
         </dl>
       </section>
+      <Link to="/help" className={page.linkCard}>
+        <CircleHelp size={20} aria-hidden="true" />
+        <span>
+          <strong>Help and questions</strong>
+          <span>What a plan covers and how claims work</span>
+        </span>
+        <ChevronRight size={20} aria-hidden="true" />
+      </Link>
       <Button
         fullWidth
         icon={<LogOut size={16} aria-hidden="true" />}

@@ -36,6 +36,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/new-customer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["newCustomer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/claims": {
         parameters: {
             query?: never;
@@ -212,6 +228,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["plans"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/policies": {
         parameters: {
             query?: never;
@@ -221,7 +253,7 @@ export interface paths {
         };
         get: operations["mine"];
         put?: never;
-        post?: never;
+        post: operations["buy"];
         delete?: never;
         options?: never;
         head?: never;
@@ -237,6 +269,14 @@ export interface components {
             reason?: string | null;
             /** Format: int64 */
             version: number;
+        };
+        BuyPolicyRequest: {
+            /** Format: date */
+            coverEnd: string;
+            /** Format: date */
+            coverStart: string;
+            /** @enum {string} */
+            plan: "ESSENTIAL" | "PLUS" | "MAX";
         };
         ClaimDetails: {
             amountClaimed: number;
@@ -313,6 +353,16 @@ export interface components {
             id: string;
             /** @enum {string} */
             role: "CUSTOMER" | "AGENT";
+        };
+        PlanOffer: {
+            blurb: string;
+            limits: {
+                [key: string]: number;
+            };
+            name: string;
+            /** @enum {string} */
+            plan: "ESSENTIAL" | "PLUS" | "MAX";
+            pricePerTrip: number;
         };
         PolicyCover: {
             /** Format: date */
@@ -436,6 +486,24 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Me"];
                 };
+            };
+        };
+    };
+    newCustomer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -724,6 +792,26 @@ export interface operations {
             };
         };
     };
+    plans: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanOffer"][];
+                };
+            };
+        };
+    };
     mine: {
         parameters: {
             query?: never;
@@ -740,6 +828,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PolicyCover"][];
+                };
+            };
+        };
+    };
+    buy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BuyPolicyRequest"];
+            };
+        };
+        responses: {
+            /** @description The new policy */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyCover"];
                 };
             };
         };

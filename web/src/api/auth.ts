@@ -66,6 +66,14 @@ export function signIn(email: string, password: string): Promise<void> {
   return postForm('/api/auth/login', { email, password });
 }
 
+/**
+ * "Try as a new customer": the server makes a fresh demo customer with no policy and signs them in. Nobody
+ * types a name, email or password, so no real personal details reach the demo.
+ */
+export function startAsNewCustomer(): Promise<void> {
+  return postForm('/api/auth/new-customer');
+}
+
 export function signOut(): Promise<void> {
   return postForm('/api/auth/logout');
 }

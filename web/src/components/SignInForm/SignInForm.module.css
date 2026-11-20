@@ -62,19 +62,19 @@
 
 .demoButtons {
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: var(--space-2);
 }
 
 .demo {
-  display: grid;
-  justify-items: center;
-  gap: var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   min-height: 56px;
-  padding: var(--space-2);
+  padding: var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  color: var(--color-text-brand);
+  text-align: left;
+  color: var(--color-text);
   background: var(--color-bg-subtle);
   cursor: pointer;
 }
@@ -88,21 +88,44 @@
   opacity: 0.7;
 }
 
-.demoLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-weight: var(--font-weight-semibold);
+.demoPrimary {
+  border-color: var(--color-brand);
+  color: var(--color-text-on-brand);
+  background: var(--color-brand);
 }
 
-.demoLabel span {
+.demoPrimary:hover:not(:disabled) {
+  background: var(--color-brand-hover);
+}
+
+.demoIcon {
+  flex: none;
   display: flex;
+  color: var(--color-text-brand);
+}
+
+.demoPrimary .demoIcon {
+  color: inherit;
+}
+
+.demoText {
+  display: grid;
+  gap: 2px;
+}
+
+.demoLabel {
+  font-weight: var(--font-weight-semibold);
 }
 
 .demoWho {
   font-size: var(--text-size-xs);
   line-height: 16px;
   color: var(--color-text-muted);
+}
+
+.demoPrimary .demoWho {
+  color: inherit;
+  opacity: 0.85;
 }
 
 .note {
