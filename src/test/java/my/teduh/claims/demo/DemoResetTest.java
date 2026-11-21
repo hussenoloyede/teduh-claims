@@ -67,7 +67,7 @@ class DemoResetTest {
 		assertThat(count("select count(*) from claims")).isPositive();
 
 		jdbc.sql("update demo_reset set last_reset_on = :day where id = 1").param("day", today.minusDays(1)).update();
-		assertThat(transaction.execute(status -> reset.resetIfDue(today))).isTrue();
+		assertThat(resetOnce()).isTrue();
 
 		assertThat(count("select count(*) from users where email like 'traveller-%'")).isZero();
 		assertThat(count("select count(*) from claims")).isZero();
@@ -80,7 +80,7 @@ class DemoResetTest {
 		assertThat(count("select count(*) from users where email = 'aisyah@example.com'")).isOne();
 
 		// Already done today: a second start the same day changes nothing.
-		assertThat(transaction.execute(status -> reset.resetIfDue(today))).isFalse();
+		assertThat(resetOnce()).isFalse();
 
 		// The next start of the app seeds the demo policies again, with fresh cover dates.
 		for (ApplicationRunner runner : runners) {
@@ -128,6 +128,12 @@ class DemoResetTest {
 			.exchange();
 		assertThat(claim).hasStatus(HttpStatus.CREATED);
 		return session;
+	}
+
+	/** One start of the app: the reset in its own transaction, as DemoReset.run does it. */
+	private boolean resetOnce() {
+		Boolean reset = transaction.execute(status -> this.reset.resetIfDue(today));
+		return Boolean.TRUE.equals(reset);
 	}
 
 	private long count(String sql) {
