@@ -1,6 +1,6 @@
 import { ChevronRight, CircleHelp, FileText, Lightbulb, Plus, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router';
-import { useMe } from '../api/auth';
+import { greetingName, useMe } from '../api/auth';
 import { isDecided, useMyClaims } from '../api/claims';
 import { coverState, limitsOf, planNames, usePolicies } from '../api/policies';
 import { ButtonLink } from '../components/Button/Button';
@@ -21,7 +21,7 @@ export function HomePage() {
   const claims = useMyClaims();
   const today = todayInMalaysia();
 
-  const firstName = me.data?.displayName.split(' ')[0];
+  const firstName = me.data ? greetingName(me.data.displayName) : undefined;
   const activeCount = policies.data?.filter((policy) => coverState(policy, today) === 'active').length ?? 0;
   const openCount = claims.data?.filter((claim) => !isDecided(claim.status)).length ?? 0;
   const noPolicy = policies.data?.length === 0;
@@ -74,7 +74,7 @@ export function HomePage() {
         <SectionHeader
           id="home-claims"
           title="Your claims"
-          badge={claims.data ? `${openCount} in progress` : undefined}
+          badge={claims.data && !noPolicy ? `${openCount} in progress` : undefined}
           link={claims.data?.length ? { to: '/claims', label: 'All claims' } : undefined}
         />
         {claims.isPending && <SectionLoading label="Loading your claims…" />}

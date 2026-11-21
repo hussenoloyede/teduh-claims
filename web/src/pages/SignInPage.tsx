@@ -29,6 +29,9 @@ export function SignInPage() {
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from;
   const [via, setVia] = useState<SignInPending>();
+  // Set while a new customer is on the way to the welcome screens, so the "already signed in" redirect
+  // below doesn't send them home first.
+  const [toWelcome, setToWelcome] = useState(false);
 
   const signInMutation = useMutation({
     mutationFn: ({ email, password }: Credentials) => signIn(email, password),
@@ -46,9 +49,14 @@ export function SignInPage() {
 
   const newCustomer = useMutation({
     mutationFn: startAsNewCustomer,
-    onMutate: () => setVia('new'),
+    onMutate: () => {
+      setToWelcome(true);
+      setVia('new');
+    },
+    onError: () => setToWelcome(false),
     onSuccess: async () => {
-      queryClient.clear();
+      // Whatever was cached belonged to whoever used this browser before.
+      queryClient.removeQueries();
       await queryClient.fetchQuery({ queryKey: meQueryKey, queryFn: fetchMe });
       void navigate('/welcome', { replace: true });
     },
@@ -57,7 +65,7 @@ export function SignInPage() {
 
   if (me.isPending) return <PageLoading />;
   // Already signed in (for example after pressing Back): go where they belong.
-  if (me.data && !signInMutation.isPending && !newCustomer.isPending) {
+  if (me.data && !signInMutation.isPending && !toWelcome) {
     return <Navigate to={landingAfterSignIn(me.data.role, from)} replace />;
   }
 

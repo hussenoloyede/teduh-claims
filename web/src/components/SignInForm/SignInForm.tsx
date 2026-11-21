@@ -57,7 +57,7 @@ export function SignInForm({ onDemo, onNewCustomer, onSubmit, pending, error }: 
           />
           <DemoButton
             label={`Try as customer ${demoAccounts.customer.name}`}
-            detail="Has a policy and claims already"
+            detail="Has a Teduh Travel Plus policy"
             icon={<UserRound size={18} />}
             waiting={pending === 'customer'}
             busy={busy}
@@ -65,7 +65,7 @@ export function SignInForm({ onDemo, onNewCustomer, onSubmit, pending, error }: 
           />
           <DemoButton
             label={`Try as agent ${demoAccounts.agent.name}`}
-            detail="Review and decide claims"
+            detail="Review the claims customers send"
             icon={<Headset size={18} />}
             waiting={pending === 'agent'}
             busy={busy}

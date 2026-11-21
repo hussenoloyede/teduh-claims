@@ -78,6 +78,14 @@ export function signOut(): Promise<void> {
   return postForm('/api/auth/logout');
 }
 
+/** The name every "Try as a new customer" account gets (NewDemoCustomers.java). */
+export const NEW_CUSTOMER_NAME = 'Demo traveller';
+
+/** "Aisyah Rahman" → "Aisyah", for "Hi, Aisyah". A new demo customer keeps both words: "Hi, Demo" reads oddly. */
+export function greetingName(displayName: string): string {
+  return displayName === NEW_CUSTOMER_NAME ? displayName : displayName.split(' ')[0];
+}
+
 /** Where each role starts. */
 export function homeFor(role: Role): string {
   return role === 'AGENT' ? '/agent/queue' : '/';

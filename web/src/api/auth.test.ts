@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { homeFor, landingAfterSignIn } from './auth';
+import { greetingName, homeFor, landingAfterSignIn } from './auth';
 
 describe('homeFor', () => {
   it('starts customers at home and agents at the queue', () => {
@@ -23,5 +23,15 @@ describe('landingAfterSignIn', () => {
     expect(landingAfterSignIn('CUSTOMER', '/agent/queue')).toBe('/');
     expect(landingAfterSignIn('AGENT', '/claims/123')).toBe('/agent/queue');
     expect(landingAfterSignIn('AGENT', '/agentless')).toBe('/agent/queue');
+  });
+});
+
+describe('greetingName', () => {
+  it('uses the first name', () => {
+    expect(greetingName('Aisyah Rahman')).toBe('Aisyah');
+  });
+
+  it('keeps a new demo customer as "Demo traveller"', () => {
+    expect(greetingName('Demo traveller')).toBe('Demo traveller');
   });
 });
