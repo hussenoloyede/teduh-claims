@@ -1,19 +1,20 @@
 # Usability findings
 
-Teduh Claims, week 7. The plan, tasks and severity scale are in `usability-test-plan.md`. Participants are P1 to P5; no names are kept.
+Teduh Claims, week 7. The plan, tasks and severity scale are in `usability-test-plan.md`. Participants are P1 to P3; no names are kept.
 
 ## Summary
 
-Filled in after the fifth session.
+Filled in after the third session.
 
-| # | Task | Completed (of 5) | Median time (s) | Median ease (1-7) |
+| # | Task | Completed (of 3) | Median time (s) | Median ease (1-7) |
 | --- | --- | --- | --- | --- |
-| 1 | File the claim with two receipts | | | |
-| 2 | Find where the claim is up to | | | |
-| 3 | Start reviewing the claim | | | |
-| 4 | Ask for the delay letter | | | |
-| 5 | Provide the delay letter | | | |
-| 6 | Approve RM 400 of RM 450 | | | |
+| 1 | Get covered as a new customer | | | |
+| 2 | File the claim with two receipts | | | |
+| 3 | Find where the claim is up to | | | |
+| 4 | Start reviewing the claim | | | |
+| 5 | Ask for the delay letter | | | |
+| 6 | Provide the delay letter | | | |
+| 7 | Approve RM 400 of RM 450 | | | |
 
 ## Problems
 
@@ -37,6 +38,7 @@ Date:
 | 4 | | | | | | |
 | 5 | | | | | | |
 | 6 | | | | | | |
+| 7 | | | | | | |
 
 Debrief:
 
@@ -52,6 +54,7 @@ Date:
 | 4 | | | | | | |
 | 5 | | | | | | |
 | 6 | | | | | | |
+| 7 | | | | | | |
 
 Debrief:
 
@@ -67,35 +70,6 @@ Date:
 | 4 | | | | | | |
 | 5 | | | | | | |
 | 6 | | | | | | |
-
-Debrief:
-
-### P4
-
-Date:
-
-| # | Completed | Time (s) | Errors | Hesitations | What they said | Ease |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | | | | | | |
-| 2 | | | | | | |
-| 3 | | | | | | |
-| 4 | | | | | | |
-| 5 | | | | | | |
-| 6 | | | | | | |
-
-Debrief:
-
-### P5
-
-Date:
-
-| # | Completed | Time (s) | Errors | Hesitations | What they said | Ease |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | | | | | | |
-| 2 | | | | | | |
-| 3 | | | | | | |
-| 4 | | | | | | |
-| 5 | | | | | | |
-| 6 | | | | | | |
+| 7 | | | | | | |
 
 Debrief:
