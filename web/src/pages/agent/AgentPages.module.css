@@ -139,16 +139,11 @@ dd.small {
 .request {
   margin: 0;
   padding: var(--space-3) var(--space-4);
-  border-left: 3px solid var(--color-brand);
   border-radius: var(--radius-md);
   color: var(--color-text);
   background: var(--color-bg-subtle);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-}
-
-.request {
-  border-left-color: var(--status-more-info-needed-text);
 }
 
 .actions {
@@ -159,16 +154,6 @@ dd.small {
 .decision {
   display: grid;
   gap: var(--space-3);
-  padding-left: var(--space-4);
-  border-left: 4px solid;
-}
-
-.decision[data-outcome='approved'] {
-  border-color: var(--status-approved-text);
-}
-
-.decision[data-outcome='rejected'] {
-  border-color: var(--status-rejected-text);
 }
 
 .outcome {

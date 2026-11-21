@@ -60,7 +60,6 @@ h2[tabindex='-1']:focus {
 .quote {
   margin: 0;
   padding: var(--space-3) var(--space-4);
-  border-left: 3px solid var(--color-brand);
   border-radius: var(--radius-md);
   color: var(--color-text-muted);
   background: var(--color-bg-subtle);
