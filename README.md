@@ -146,11 +146,21 @@ npm test
 
 `npm run storybook` opens the component library on port 6006.
 
-## Design process and usability test
+## Design process
 
-The screens were designed in Figma first: user flows for both roles, then wireframes, then high-fidelity screens with variables for colour, type and spacing that match the code's design tokens. The customer side is designed for a phone and uses Teduh green; the agent side is designed for a laptop and uses blue.
+Every screen was designed in Figma before it was built: user flows for both roles, then wireframes, then high-fidelity screens. There are 15 customer screens, 12 agent screens and 11 more for a new customer (splash, welcome, choosing a plan, help, and the sign-in page's demo buttons). The customer side is designed for a phone and uses Teduh green; the agent side is designed for a laptop and uses blue.
 
-<!-- Case study link and summary: added after the usability sessions. -->
+- One set of design tokens. In Figma the colours are one collection with a Customer mode and an Agent mode, next to variables for type and spacing. In code the same values live in `web/src/tokens.css`, and the agent pages switch the colours with one attribute. Type is Inter for body text and Plus Jakarta Sans for headings.
+- Contrast checked before building. Three greys and the agent green were darkened slightly so all text passes 4.5:1, and text fields got a border dark enough to pass 3:1 as a control.
+- A component library, not one-off screens. The 27 shared components (buttons, fields, the claim timeline, the plan card, dialogs and more) each have Storybook stories for their states. Every story also runs as a test with the axe accessibility checks.
+- Designed, then questioned. Late in the build it was clear the app had no way in for someone without a policy: every demo account already had one. The new-customer flow (welcome screens, choosing a plan and trip dates, a home page for someone with no cover yet) was drafted in Figma first, then built.
+
+Where the build differs from the design, it is on purpose:
+
+- Documents say Download, not View, because the links download the file.
+- The current tab in the bottom bar gets a pale background as well as a colour, because colour alone was too faint to see.
+- People are shown as initials, never photos. Labels are in sentence case.
+- The coloured stripes beside quoted text and decisions were removed: they added noise without adding meaning.
 
 ## Things the build leaves out on purpose
 
